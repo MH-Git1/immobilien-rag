@@ -6,6 +6,110 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ---
 
+## Lauf vom 2026-08-06 01:43 (CEST) — Bonorum entfernt, längere Teilungserklärungen, Prompt-Fix
+
+**Git-Commit:** wird im nächsten Commit ergänzt (siehe unten) — diese
+Doku ist Teil desselben Commits wie die zugrunde liegenden Änderungen.
+
+**Was sich seit dem letzten Lauf geändert hat:**
+
+- **Bonorum-Wording entfernt**: Fiktiver Firmenname in `scripts/generate_pdfs.py`
+  (Exposé-Kontaktblock) und E-Mail-Domains in `scripts/objektdaten.py`
+  von "Bonorum" auf "Musterwert Immobilien GmbH" geändert; `CLAUDE.md`
+  entsprechend verallgemeinert. Verifiziert: kein "Bonorum" mehr in
+  irgendeiner der 32 PDFs.
+- **Teilungserklärungen verlängert**: Für alle 8 Objekte um 5 Abschnitte
+  ergänzt (Bauliche Veränderungen, Instandhaltung, Verwalter,
+  Tierhaltung, Schlussbestimmungen). Damit erstmals Dokumente, die über
+  die 1024-Token-Chunking-Grenze kommen.
+- **Wichtige technische Erkenntnis beim Chunking-Test**: Die
+  Teilungserklärungen sind jetzt 2 PDF-Seiten lang. `PDFReader` (aus
+  `llama-index-readers-file`) erzeugt dabei **ein Document pro
+  PDF-Seite**, nicht eines pro Datei — die "Aufteilung" erfolgt also
+  über Seitengrenzen, nicht über den `SentenceSplitter` mit
+  Token-Overlap (der hätte nur bei einer einzelnen, über 1024 Tokens
+  langen Seite gegriffen). Praktisch bedeutet das: kein Overlap
+  zwischen den beiden Teilen, aber echtes Multi-Node-Retrieval pro
+  Dokument wird trotzdem erstmals getestet. Corpus jetzt 40 Chunks
+  (24 einseitige Dokumente + 8 Teilungserklärungen × 2 Seiten).
+- **QA_PROMPT nachgeschärft**: Neue Anweisung, bei Zahlen-/Datumsangaben
+  gezielt auf abweichende Werte zu prüfen, auch wenn Quellen den
+  Sachverhalt unterschiedlich benennen (z. B. "Baujahr" vs. "Baujahr
+  Gebäude"). Behebt den in der vorherigen Doku beschriebenen
+  Schwachpunkt bei Testfall Kastanienhof/Baujahr.
+- **Regression gefunden und behoben, bevor sie dokumentiert wurde**:
+  Die erste Version der längeren Teilungserklärungen enthielt in 7 von
+  8 Objekten eine fast wortgleiche generische Formulierung
+  ("...wird aus der Instandhaltungsrücklage finanziert"). Das
+  verwässerte den Begriff "Instandhaltungsrücklage" über alle Objekte
+  hinweg und führte in Kombination mit dem nachgeschärften Prompt dazu,
+  dass Testfall #6 (Gartenhof-Rücklage) plötzlich fehlschlug — das
+  Modell antwortete widersprüchlich ("Ja... jedoch keine spezifische
+  Erhöhung erwähnt"), reproduzierbar in 3/3 Versuchen. Behoben durch
+  Umformulierung der 6 nicht objektspezifisch betroffenen
+  Teilungserklärungen (Sonnenblick und Kastanienhof behalten den Begriff,
+  da dort tatsächlich objektspezifisch relevant). Nach der Korrektur
+  läuft Testfall #6 wieder zuverlässig (3/3 verifiziert).
+- Testkatalog um 1 auf 12 Fragen erweitert (neuer Testfall: Info auf
+  Seite 2 einer mehrseitigen Teilungserklärung).
+
+**Ergebnis: 12 von 12 Testfällen wie erwartet.**
+
+| # | Kategorie | Ergebnis |
+|---|---|---|
+| 1 | Widerspruch zwischen Quellen (Sonnenblick, Wohnfläche) | ✅ |
+| 2 | Info nur in einem Dokument (Sonnenblick, Fahrstuhl) | ✅ |
+| 3 | Einfacher Fakt (Gartenhof, Kaufpreis) | ✅ |
+| 4 | Negativ-Fakt (Gartenhof, kein Fahrstuhl) | ✅ |
+| 5 | Halluzinationstest (Ahornhöhe, Sauna) | ✅ |
+| 6 | Cross-Objekt-Verwechslung (Gartenhof, Rücklage) | ✅ (nach Regression + Fix, siehe oben) |
+| 7 | Vergleich über 8 Objekte (Energieeffizienzklasse) | ✅ |
+| 8 | Info nur in Teilungserklärung (Lindenpark, Garten-Sondernutzungsrecht) | ✅ |
+| 9 | Widerspruch, unterschiedlich benannte Felder (Kastanienhof, Baujahr) | ✅ **jetzt erkannt** (vorher bekannter Fehler, siehe Prompt-Fix oben) |
+| 10 | Cross-Objekt-Verwechslung, ähnliche Neubauten (Birkenallee vs. Rosenhügel, PV-Anlage) | ✅ |
+| 11 | Halluzinationstest (Seeblick, Concierge-Service) | ✅ |
+| 12 | Mehrseitiges Dokument / Chunking über Seitengrenze (Lindenpark, Verwalter auf Seite 2) | ✅ **neu** |
+
+Vollständige Frage/Antwort-Details für die unveränderten Testfälle
+(1-8, 10-11) siehe vorherige Einträge unten — die Antworten sind
+inhaltlich gleichwertig. Details zu den veränderten/neuen Fällen
+(9, 12) und dem behobenen Regressionsfall (6):
+
+### Test #6 — Cross-Objekt-Verwechslung (nach Fix)
+
+**Antwort:**
+> Nein, bei der WEG Gartenhof wurde keine Erhöhung der
+> Instandhaltungsrücklage beschlossen. In den Protokollen der
+> Eigentümerversammlung wird lediglich die Genehmigung der
+> Jahresabrechnung und die Pflege der Gartenanlage behandelt, jedoch
+> keine Erhöhung der Instandhaltungsrücklage erwähnt.
+
+### Test #9 — Widerspruch, unterschiedlich benannte Felder (nach Prompt-Fix)
+
+**Antwort:**
+> Das Gebäude "Kastanienhof" wurde im Jahr 1974 gebaut, wie im
+> Energieausweis angegeben (Dateiname:
+> objekt6_kastanienhof_energieausweis.pdf). Im Exposé wird jedoch das
+> Baujahr als 1975 angegeben (Dateiname: objekt6_kastanienhof_expose.pdf).
+> Dies stellt einen Widerspruch dar.
+
+### Test #12 — Mehrseitiges Dokument (neu)
+
+**Frage:** Welche Hausverwaltung ist laut Teilungserklärung als
+Verwalter der WEG Lindenpark bestellt?
+
+**Antwort:**
+> Laut der Teilungserklärung für die WEG Lindenpark ist die
+> Hausverwaltung Baumann als Verwalter bestellt (Quelle:
+> objekt4_lindenpark_teilungserklaerung.pdf).
+
+**Quellen (Auszug):** `objekt4_lindenpark_teilungserklaerung.pdf`
+erscheint zweimal in der Quellenliste — einmal pro Seite (Seite 1 und
+Seite 2) — der Verwalter-Abschnitt liegt auf Seite 2 und wurde korrekt
+gefunden.
+
+---
+
 ## Lauf vom 2026-08-06 00:56 (CEST) — Bestätigungslauf, erstmals mit Git-Commit verknüpft
 
 **Git-Commit:** `dbe75ceb7ad792bf7ce15c4d832cc011e0693859` ("README hinzufügen",

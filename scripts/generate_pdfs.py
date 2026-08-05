@@ -105,7 +105,7 @@ def render_expose(objekt):
         Paragraph(e["lage"], STYLE_BODY),
         Paragraph("Kontakt", STYLE_SECTION),
         Paragraph(
-            f'Bonorum Immobilien GmbH<br/>Ansprechpartner: {e["kontakt_name"]}'
+            f'Musterwert Immobilien GmbH<br/>Ansprechpartner: {e["kontakt_name"]}'
             f'<br/>Tel: {e["kontakt_tel"]}<br/>E-Mail: {e["kontakt_email"]}',
             STYLE_BODY,
         ),
@@ -263,6 +263,16 @@ def render_teilungserklaerung(objekt):
         Paragraph(t["sondernutzungsrechte"], STYLE_BODY),
         Paragraph("Stimmrecht", STYLE_SECTION),
         Paragraph(t["stimmrecht"], STYLE_BODY),
+        Paragraph("Bauliche Veränderungen", STYLE_SECTION),
+        Paragraph(t["bauliche_veraenderungen"], STYLE_BODY),
+        Paragraph("Instandhaltung und Instandsetzung", STYLE_SECTION),
+        Paragraph(t["instandhaltung"], STYLE_BODY),
+        Paragraph("Verwalter", STYLE_SECTION),
+        Paragraph(t["verwalter"], STYLE_BODY),
+        Paragraph("Tierhaltung", STYLE_SECTION),
+        Paragraph(t["tierhaltung"], STYLE_BODY),
+        Paragraph("Schlussbestimmungen", STYLE_SECTION),
+        Paragraph(t["schlussbestimmungen"], STYLE_BODY),
         Spacer(1, 0.6 * cm),
         Paragraph(
             "Diese Teilungserklärung regelt gemäß § 8 WEG die Aufteilung "

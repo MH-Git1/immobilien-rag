@@ -102,11 +102,16 @@ TESTFRAGEN = [
     },
     {
         "frage": "In welchem Jahr wurde das Gebäude Kastanienhof gebaut?",
-        "kategorie": "Widerspruch zwischen Quellen (neu)",
+        "kategorie": "Widerspruch zwischen Quellen (unterschiedlich benannte Felder)",
         "erwartung": (
             "Leichte Abweichung: Exposé nennt Baujahr 1975, "
             "Energieausweis nennt Baujahr Gebäude 1974. Sollte beide "
-            "Werte mit Quelle nennen, nicht nur einen."
+            "Werte mit Quelle nennen, nicht nur einen. Ursprünglich hat "
+            "das Modell diesen Widerspruch NICHT erkannt (nur 1975 "
+            "genannt), weil die Felder unterschiedlich benannt sind "
+            "('Baujahr' vs. 'Baujahr Gebäude') — seit dem QA_PROMPT-Fix "
+            "(explizite Anweisung, auch bei abweichender Benennung auf "
+            "Widersprüche zu prüfen) wird es zuverlässig erkannt."
         ),
     },
     {
@@ -129,6 +134,22 @@ TESTFRAGEN = [
         "erwartung": (
             "Es gibt keinen Concierge-Service in den Unterlagen. Sollte "
             "klar sagen, dass die Information nicht vorhanden ist."
+        ),
+    },
+    {
+        "frage": (
+            "Welche Hausverwaltung ist laut Teilungserklärung als "
+            "Verwalter der WEG Lindenpark bestellt?"
+        ),
+        "kategorie": "Mehrseitiges Dokument (Chunking über Seitengrenze)",
+        "erwartung": (
+            "Hausverwaltung Baumann. Die Teilungserklärungen umfassen "
+            "seit der Erweiterung um zusätzliche Abschnitte "
+            "(Bauliche Veränderungen, Instandhaltung, Verwalter, "
+            "Tierhaltung, Schlussbestimmungen) jeweils 2 PDF-Seiten — "
+            "der Verwalter-Abschnitt steht auf Seite 2. Testet, ob "
+            "Retrieval den richtigen Teil eines mehrseitigen Dokuments "
+            "findet, statt nur die erste Seite/den ganzen Chunk."
         ),
     },
 ]

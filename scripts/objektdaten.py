@@ -52,7 +52,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Frau S. Reiter",
             "kontakt_tel": "089 / 555-0142",
-            "kontakt_email": "reiter@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "reiter@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Bedarfsausweis",
@@ -153,6 +153,73 @@ OBJEKTE = [
                 "nach dem Kopfprinzip: Jede Einheit hat unabhängig von "
                 "ihrem Miteigentumsanteil eine Stimme."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum sowie "
+                "Maßnahmen, die über die ordnungsgemäße Instandhaltung "
+                "hinausgehen, bedürfen gemäß § 20 WEG eines Beschlusses "
+                "der Eigentümerversammlung. Veränderungen, die andere "
+                "Wohnungseigentümer über das bei einem geordneten "
+                "Zusammenleben unvermeidliche Maß hinaus beeinträchtigen, "
+                "bedürfen zusätzlich der Zustimmung der betroffenen "
+                "Eigentümer. Dies betrifft insbesondere Eingriffe in "
+                "tragende Wände, Veränderungen der Fassade (einschließlich "
+                "Balkonverglasungen und Markisen), sowie Maßnahmen an "
+                "Fenstern und Rollläden, soweit deren äußeres "
+                "Erscheinungsbild betroffen ist. Anträge auf bauliche "
+                "Veränderungen sind der Verwaltung schriftlich mit "
+                "Bauplänen und Kostenschätzung vorzulegen."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums obliegt der "
+                "Gemeinschaft der Wohnungseigentümer und wird aus der "
+                "Instandhaltungsrücklage finanziert, deren Höhe die "
+                "Eigentümerversammlung durch Beschluss festlegt. Kommt "
+                "ein Eigentümer seiner Instandhaltungspflicht am "
+                "Sondereigentum nicht nach und entsteht dadurch ein "
+                "Schaden am Gemeinschaftseigentum oder an anderem "
+                "Sondereigentum, haftet er hierfür nach den allgemeinen "
+                "gesetzlichen Vorschriften."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Hausverwaltung "
+                "Brunner & Partner). Der Verwalter ist insbesondere "
+                "zuständig für die Aufstellung des Wirtschaftsplans, die "
+                "Erstellung der Jahresabrechnung, die Einberufung und "
+                "Durchführung der Eigentümerversammlungen sowie die "
+                "Umsetzung der gefassten Beschlüsse. Die Bestellung "
+                "erfolgt jeweils für einen Zeitraum von bis zu fünf "
+                "Jahren und kann durch die Eigentümerversammlung mit "
+                "einfacher Mehrheit erneuert oder aus wichtigem Grund "
+                "vorzeitig widerrufen werden."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im Rahmen des üblichen "
+                "Umfangs (insbesondere Katzen, Kleintiere sowie ein Hund "
+                "je Wohneinheit) ist zulässig, sofern hierdurch keine "
+                "Beeinträchtigung anderer Eigentümer oder Bewohner "
+                "entsteht. Die Haltung gefährlicher oder besonders "
+                "lärmintensiver Tiere sowie eine gewerbsmäßige "
+                "Tierhaltung bedarf der vorherigen Zustimmung der "
+                "Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt; an die Stelle "
+                "der unwirksamen Bestimmung tritt eine dem wirtschaftlich "
+                "Gewollten möglichst nahekommende Regelung. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer, soweit gesetzlich nichts anderes "
+                "bestimmt ist. Die Kosten dieser Urkunde sowie ihres "
+                "Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -193,7 +260,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Herr T. Neumann",
             "kontakt_tel": "0221 / 555-0198",
-            "kontakt_email": "neumann@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "neumann@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Verbrauchsausweis",
@@ -277,6 +344,63 @@ OBJEKTE = [
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Veränderungen, die andere "
+                "Wohnungseigentümer über das bei einem geordneten "
+                "Zusammenleben unvermeidliche Maß hinaus beeinträchtigen, "
+                "bedürfen zusätzlich der Zustimmung der betroffenen "
+                "Eigentümer. Dies gilt insbesondere für bauliche "
+                "Veränderungen an der zum Sondernutzungsrecht gehörenden "
+                "Terrassenfläche, soweit diese von außen sichtbar sind "
+                "(z. B. Sichtschutzwände, feste Überdachungen), sowie für "
+                "Eingriffe in die Fassade oder tragende Bauteile."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "einschließlich der ihm zugewiesenen Sondernutzungsfläche "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums obliegt "
+                "gemeinschaftlich allen Wohnungseigentümern. Die Pflege der "
+                "gemeinschaftlichen Gartenanlage (außerhalb der "
+                "Sondernutzungsflächen) wird durch die Gemeinschaft "
+                "organisiert und aus den laufenden Hausgeldern finanziert."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Hausverwaltung "
+                "Klein). Der Verwalter ist insbesondere zuständig für "
+                "die Aufstellung des Wirtschaftsplans, die Erstellung "
+                "der Jahresabrechnung, die Einberufung und Durchführung "
+                "der Eigentümerversammlungen sowie die Umsetzung der "
+                "gefassten Beschlüsse. Die Bestellung erfolgt jeweils "
+                "für einen Zeitraum von bis zu fünf Jahren."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang "
+                "(insbesondere Katzen, Kleintiere sowie ein Hund je "
+                "Wohneinheit) ist zulässig, sofern hierdurch keine "
+                "Beeinträchtigung anderer Eigentümer oder Bewohner "
+                "entsteht. Insbesondere im Bereich der gemeinschaftlichen "
+                "Gartenanlage ist auf die Beseitigung von "
+                "Tierhinterlassenschaften zu achten. Die Haltung "
+                "gefährlicher Tiere bedarf der vorherigen Zustimmung der "
+                "Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer, soweit gesetzlich nichts anderes "
+                "bestimmt ist. Die Kosten dieser Urkunde sowie ihres "
+                "Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -316,7 +440,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Frau J. Petersen",
             "kontakt_tel": "040 / 555-0176",
-            "kontakt_email": "petersen@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "petersen@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Bedarfsausweis",
@@ -404,6 +528,60 @@ OBJEKTE = [
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Für die Dachterrasse der Einheit "
+                "Nr. 14 gilt: Feste Aufbauten (z. B. Pergolen, "
+                "Wintergärten) sowie Veränderungen, die die Statik oder "
+                "die Dachabdichtung berühren, bedürfen zusätzlich der "
+                "gesonderten Zustimmung der Eigentümerversammlung und "
+                "eines Nachweises der statischen Unbedenklichkeit durch "
+                "einen Fachplaner. Veränderungen an der Fassade, den "
+                "Fenstern oder der Gebäudetechnik (insbesondere der "
+                "Wärmepumpenanlage) bedürfen ebenfalls eines Beschlusses."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums, insbesondere "
+                "der zentralen Wärmepumpenanlage und des Fahrstuhls, "
+                "obliegt gemeinschaftlich allen Wohnungseigentümern. Für die "
+                "Dachabdichtung im Bereich der Sondernutzungsfläche "
+                "Dachterrasse trägt die Gemeinschaft die Kosten der "
+                "Instandhaltung, während die Reinigung der Terrasse "
+                "selbst dem nutzungsberechtigten Eigentümer obliegt."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Wagner "
+                "Immobilienverwaltung). Der Verwalter ist insbesondere "
+                "zuständig für die Aufstellung des Wirtschaftsplans, die "
+                "Erstellung der Jahresabrechnung, die Einberufung und "
+                "Durchführung der Eigentümerversammlungen sowie die "
+                "Umsetzung der gefassten Beschlüsse."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang ist "
+                "zulässig, sofern hierdurch keine Beeinträchtigung "
+                "anderer Eigentümer oder Bewohner entsteht. Das "
+                "Ausführen von Hunden über die Dachterrasse anderer "
+                "Einheiten ist ausgeschlossen. Die Haltung gefährlicher "
+                "oder besonders lärmintensiver Tiere bedarf der "
+                "vorherigen Zustimmung der Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer. Die Kosten dieser Urkunde sowie "
+                "ihres Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -445,7 +623,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Herr M. Krause",
             "kontakt_tel": "030 / 555-0223",
-            "kontakt_email": "krause@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "krause@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Verbrauchsausweis",
@@ -533,6 +711,57 @@ OBJEKTE = [
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Da es sich um ein Gebäude mit "
+                "denkmalrechtlich relevanter Gründerzeitfassade handelt, "
+                "bedürfen Veränderungen an der Fassade, den Fenstern und "
+                "dem Stuck zusätzlich der Abstimmung mit der zuständigen "
+                "Denkmalschutzbehörde. Für die Sondernutzungsfläche im "
+                "Garten gilt: Feste bauliche Anlagen (Gartenhäuser, "
+                "Terrassenüberdachungen) bedürfen der Zustimmung der "
+                "Eigentümerversammlung."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums, insbesondere "
+                "der historischen Fassade und des Dachs, obliegt "
+                "gemeinschaftlich allen Wohnungseigentümern. Die Pflege der dem "
+                "Sondernutzungsrecht unterliegenden Gartenfläche obliegt "
+                "dem nutzungsberechtigten Eigentümer der Einheit Nr. 2."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Hausverwaltung "
+                "Baumann). Der Verwalter ist insbesondere zuständig für "
+                "die Aufstellung des Wirtschaftsplans, die Erstellung "
+                "der Jahresabrechnung, die Einberufung und Durchführung "
+                "der Eigentümerversammlungen sowie die Umsetzung der "
+                "gefassten Beschlüsse."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang ist "
+                "zulässig, sofern hierdurch keine Beeinträchtigung "
+                "anderer Eigentümer oder Bewohner entsteht. Für die "
+                "Sondernutzungsfläche im Garten gilt, dass eine "
+                "gewerbsmäßige Tierhaltung sowie die Haltung von mehr "
+                "als zwei Hunden je Einheit der vorherigen Zustimmung "
+                "der Verwaltung bedarf."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer. Die Kosten dieser Urkunde sowie "
+                "ihres Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -574,7 +803,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Frau C. Herrmann",
             "kontakt_tel": "07531 / 555-0311",
-            "kontakt_email": "herrmann@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "herrmann@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Bedarfsausweis",
@@ -661,6 +890,58 @@ OBJEKTE = [
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Da das Gebäude dem "
+                "KfW-Effizienzhaus-40-Standard entspricht, bedürfen "
+                "Eingriffe in die Gebäudehülle (Fassade, Fenster, "
+                "Dämmung) sowie an der Photovoltaikanlage und der "
+                "Erdwärmepumpe zusätzlich der Zustimmung der "
+                "Eigentümerversammlung und eines Nachweises, dass der "
+                "energetische Standard des Gebäudes dadurch nicht "
+                "beeinträchtigt wird."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums, insbesondere "
+                "der Erdwärmepumpenanlage und der Photovoltaikanlage, "
+                "obliegt gemeinschaftlich allen Wohnungseigentümern. Die "
+                "laufende Wartung dieser Anlagen erfolgt im Rahmen der "
+                "Herstellergarantie durch eine von der Verwaltung "
+                "beauftragte Fachfirma."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Zimmermann "
+                "Hausverwaltung). Der Verwalter ist insbesondere "
+                "zuständig für die Aufstellung des Wirtschaftsplans, die "
+                "Erstellung der Jahresabrechnung, die Einberufung und "
+                "Durchführung der Eigentümerversammlungen sowie die "
+                "Umsetzung der gefassten Beschlüsse."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang ist "
+                "zulässig, sofern hierdurch keine Beeinträchtigung "
+                "anderer Eigentümer oder Bewohner entsteht. Auf der "
+                "Uferpromenade und den gemeinschaftlichen Außenanlagen "
+                "besteht Leinenpflicht für Hunde. Die Haltung "
+                "gefährlicher Tiere bedarf der vorherigen Zustimmung der "
+                "Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer. Die Kosten dieser Urkunde sowie "
+                "ihres Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -701,7 +982,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Herr R. Vogel",
             "kontakt_tel": "0341 / 555-0287",
-            "kontakt_email": "vogel@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "vogel@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Verbrauchsausweis",
@@ -788,6 +1069,60 @@ OBJEKTE = [
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Angesichts des bestehenden "
+                "Sanierungsstaus (siehe Protokoll der Eigentümerversammlung "
+                "vom 03.05.2024) wird ausdrücklich klargestellt, dass "
+                "Maßnahmen im Rahmen des von der Eigentümerversammlung "
+                "beauftragten Sanierungsfahrplans (insbesondere "
+                "Fassadendämmung und Fensteraustausch) als ordnungsgemäße "
+                "Instandsetzung gelten und keiner gesonderten Zustimmung "
+                "einzelner Eigentümer bedürfen, sofern sie durch "
+                "Mehrheitsbeschluss der Versammlung getragen werden."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums obliegt der "
+                "Gemeinschaft der Wohnungseigentümer und wird aus der "
+                "Instandhaltungsrücklage finanziert. Angesichts des "
+                "erhöhten Instandsetzungsbedarfs bei diesem Gebäude "
+                "(Baujahr 1974) kann die Eigentümerversammlung "
+                "Sonderumlagen beschließen, soweit die "
+                "Instandhaltungsrücklage zur Deckung dringender "
+                "Maßnahmen nicht ausreicht."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Hausverwaltung "
+                "Schulze & Co.). Der Verwalter ist insbesondere zuständig "
+                "für die Aufstellung des Wirtschaftsplans, die "
+                "Erstellung der Jahresabrechnung, die Einberufung und "
+                "Durchführung der Eigentümerversammlungen sowie die "
+                "Umsetzung der gefassten Beschlüsse, einschließlich der "
+                "Koordination des laufenden Sanierungsfahrplans."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang ist "
+                "zulässig, sofern hierdurch keine Beeinträchtigung "
+                "anderer Eigentümer oder Bewohner entsteht. Die Haltung "
+                "gefährlicher oder besonders lärmintensiver Tiere bedarf "
+                "der vorherigen Zustimmung der Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer. Die Kosten dieser Urkunde sowie "
+                "ihres Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -827,7 +1162,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Herr D. Albrecht",
             "kontakt_tel": "069 / 555-0344",
-            "kontakt_email": "albrecht@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "albrecht@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Bedarfsausweis",
@@ -912,6 +1247,55 @@ OBJEKTE = [
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
             ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Für Maßnahmen an der auf dem Dach "
+                "beschlossenen Photovoltaikanlage (siehe Protokoll der "
+                "Eigentümerversammlung vom 19.06.2024) sowie für "
+                "Eingriffe in die Gebäudetechnik (Wärmepumpe, "
+                "Dachkonstruktion) ist zusätzlich die Zustimmung der "
+                "Eigentümerversammlung erforderlich. Balkonverglasungen "
+                "sind einheitlich nach dem von der Verwaltung "
+                "vorgegebenen Muster auszuführen."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums, insbesondere "
+                "der Wärmepumpenanlage, der Tiefgarage und der neu "
+                "installierten Photovoltaikanlage, obliegt gemeinschaftlich "
+                "allen Wohnungseigentümern."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Hartmann "
+                "Immobilienverwaltung). Der Verwalter ist insbesondere "
+                "zuständig für die Aufstellung des Wirtschaftsplans, die "
+                "Erstellung der Jahresabrechnung, die Einberufung und "
+                "Durchführung der Eigentümerversammlungen sowie die "
+                "Umsetzung der gefassten Beschlüsse."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang ist "
+                "zulässig, sofern hierdurch keine Beeinträchtigung "
+                "anderer Eigentümer oder Bewohner entsteht. Die Haltung "
+                "gefährlicher oder besonders lärmintensiver Tiere sowie "
+                "eine gewerbsmäßige Tierhaltung bedarf der vorherigen "
+                "Zustimmung der Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer. Die Kosten dieser Urkunde sowie "
+                "ihres Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
+            ),
         },
     },
     # ------------------------------------------------------------------
@@ -952,7 +1336,7 @@ OBJEKTE = [
             ),
             "kontakt_name": "Frau L. Winter",
             "kontakt_tel": "0351 / 555-0299",
-            "kontakt_email": "winter@bonorum-immobilien-beispiel.de",
+            "kontakt_email": "winter@musterwert-immobilien-beispiel.de",
         },
         "energieausweis": {
             "art": "Bedarfsausweis",
@@ -1036,6 +1420,56 @@ OBJEKTE = [
             "stimmrecht": (
                 "Das Stimmrecht richtet sich nach dem Verhältnis der "
                 "Miteigentumsanteile (Wertprinzip)."
+            ),
+            "bauliche_veraenderungen": (
+                "Bauliche Veränderungen am Gemeinschaftseigentum bedürfen "
+                "gemäß § 20 WEG eines Beschlusses der "
+                "Eigentümerversammlung. Die spätere Nachrüstung einer "
+                "Photovoltaikanlage auf dem Dach — wie in der "
+                "Eigentümerversammlung vom 08.06.2024 angeregt, aber noch "
+                "nicht beschlossen — bedarf eines gesonderten "
+                "Mehrheitsbeschlusses samt Kostenvoranschlag, bevor mit "
+                "der Umsetzung begonnen werden darf. Veränderungen an "
+                "den Balkonen sind einheitlich nach dem von der "
+                "Verwaltung vorgegebenen Muster auszuführen."
+            ),
+            "instandhaltung": (
+                "Jeder Eigentümer ist verpflichtet, sein Sondereigentum "
+                "so instand zu halten, dass anderen Eigentümern kein "
+                "Nachteil entsteht. Die Instandhaltung und "
+                "Instandsetzung des Gemeinschaftseigentums obliegt "
+                "gemeinschaftlich allen Wohnungseigentümern. Da das Gebäude erst "
+                "2022 fertiggestellt wurde, bestehen für wesentliche "
+                "Bauteile noch Gewährleistungsansprüche gegenüber dem "
+                "Bauträger, die von der Verwaltung im Interesse der "
+                "Gemeinschaft zu verfolgen sind."
+            ),
+            "verwalter": (
+                "Die Wohnungseigentümergemeinschaft wird durch einen von "
+                "der Eigentümerversammlung bestellten Verwalter "
+                "vertreten (zum Zeitpunkt der Beurkundung: Lange "
+                "Hausverwaltung). Der Verwalter ist insbesondere "
+                "zuständig für die Aufstellung des Wirtschaftsplans, die "
+                "Erstellung der Jahresabrechnung, die Einberufung und "
+                "Durchführung der Eigentümerversammlungen sowie die "
+                "Umsetzung der gefassten Beschlüsse."
+            ),
+            "tierhaltung": (
+                "Die Haltung von Haustieren im üblichen Umfang ist "
+                "zulässig, sofern hierdurch keine Beeinträchtigung "
+                "anderer Eigentümer oder Bewohner entsteht. Die Haltung "
+                "gefährlicher oder besonders lärmintensiver Tiere bedarf "
+                "der vorherigen Zustimmung der Verwaltung."
+            ),
+            "schlussbestimmungen": (
+                "Sollte eine Bestimmung dieser Teilungserklärung "
+                "unwirksam sein oder werden, bleibt die Wirksamkeit der "
+                "übrigen Bestimmungen hiervon unberührt. Änderungen "
+                "dieser Teilungserklärung bedürfen der notariellen Form "
+                "sowie grundsätzlich der Zustimmung aller betroffenen "
+                "Wohnungseigentümer. Die Kosten dieser Urkunde sowie "
+                "ihres Vollzugs trägt der jeweilige Ersterwerber der "
+                "betreffenden Einheit."
             ),
         },
     },

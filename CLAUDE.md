@@ -7,7 +7,7 @@ Teilungserklärungen) beantwortet — mit Quellenangabe, aus welchem
 Dokument die Antwort stammt.
 
 Zweck: Portfolio-Projekt für Bewerbungen als AI Engineer, langfristig 
-möglicher Kern einer Software für die Immobilienfirma Bonorum.
+möglicher Kern einer Software für eine Immobilienfirma.
 
 ## Aktueller Stand (Stufe 2)
 Dokumente einlesen → in Abschnitte zerlegen (Chunking) → Embeddings 
@@ -36,7 +36,7 @@ stillschweigend aufgelöst zu werden. Testkatalog in tests/testfragen.py.
 - Kommentare im Code auf Deutsch oder Englisch sind beide okay
 
 ## Testdaten
-Noch keine echten Bonorum-Dokumente. Selbst erzeugte, realistische
+Noch keine echten Objektunterlagen eines realen Auftraggebers. Selbst erzeugte, realistische
 Beispiel-Objektunterlagen zu 8 fiktiven Objekten × 4 Dokumenttypen
 (Exposé, Energieausweis, Protokoll, Teilungserklärung) = 32 PDF-
 Dokumente in `data_pdf/`, generiert per `scripts/generate_pdfs.py`
