@@ -8,8 +8,9 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ## Lauf vom 2026-08-06 01:43 (CEST) — Bonorum entfernt, längere Teilungserklärungen, Prompt-Fix
 
-**Git-Commit:** wird im nächsten Commit ergänzt (siehe unten) — diese
-Doku ist Teil desselben Commits wie die zugrunde liegenden Änderungen.
+**Git-Commit:** `8f15fb46620aa4f083f7e9f770da0d2d180ac4fe` ("Bonorum-Wording
+entfernt, Teilungserklärungen verlängert, Widerspruchs-Prompt
+nachgeschärft")
 
 **Was sich seit dem letzten Lauf geändert hat:**
 
