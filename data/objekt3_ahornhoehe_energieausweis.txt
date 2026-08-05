@@ -1,0 +1,50 @@
+ENERGIEAUSWEIS
+für Wohngebäude gemäß Gebäudeenergiegesetz (GEG)
+
+Objekt
+------
+Penthouse "Ahornhöhe"
+Ahornweg 21, 22303 Hamburg
+5. Obergeschoss (Penthouse)
+
+Art des Ausweises
+------------------
+Bedarfsausweis
+
+Gebäudedaten
+------------
+Gebäudetyp:              Mehrfamilienhaus, Wohnungseigentum (Neubau)
+Baujahr Gebäude:          2016
+Baujahr Wärmeerzeuger:    2016 (Luft-Wasser-Wärmepumpe, zentral)
+Wohnfläche (Berechnung):  112 m²
+Anzahl Wohneinheiten im Gebäude: 14
+
+Energetische Kennwerte
+-----------------------
+Endenergiebedarf:               42 kWh/(m²·a)
+Primärenergiebedarf:            38 kWh/(m²·a)
+Energieeffizienzklasse:         A
+
+Wesentliche Energieträger
+--------------------------
+Heizung:      Strom (Wärmepumpe, zentral)
+Warmwasser:   zentral über Wärmepumpe, unterstützt durch Solarthermie
+
+Empfehlungen zur Verbesserung der Energieeffizienz
+----------------------------------------------------
+Keine wesentlichen Maßnahmen erforderlich, Gebäude entspricht dem
+KfW-Effizienzhaus-40-Standard.
+
+Gültigkeit
+----------
+Ausstellungsdatum:  20.01.2024
+Gültig bis:         19.01.2034
+
+Aussteller
+----------
+Ing.-Büro für Energieberatung Hoffmann
+Registriernummer: DE-2024-9933-EAB
+
+Hinweis: Dieser Energieausweis dient nur der Information über die
+energetische Qualität des Gebäudes und ersetzt keine technische
+Beratung vor Ort.

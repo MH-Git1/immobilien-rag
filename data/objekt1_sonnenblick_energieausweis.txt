@@ -1,0 +1,52 @@
+ENERGIEAUSWEIS
+für Wohngebäude gemäß Gebäudeenergiegesetz (GEG)
+
+Objekt
+------
+Wohnung "Sonnenblick"
+Musterstraße 12, 80331 München
+3. Obergeschoss
+
+Art des Ausweises
+------------------
+Bedarfsausweis
+
+Gebäudedaten
+------------
+Gebäudetyp:              Mehrfamilienhaus, Wohnungseigentum
+Baujahr Gebäude:          1962
+Baujahr Wärmeerzeuger:    2019 (Gas-Brennwertkessel, zentral)
+Wohnfläche (Berechnung):  76 m²
+Anzahl Wohneinheiten im Gebäude: 12
+
+Energetische Kennwerte
+-----------------------
+Endenergiebedarf:               118 kWh/(m²·a)
+Primärenergiebedarf:            132 kWh/(m²·a)
+Energieeffizienzklasse:         D
+
+Wesentliche Energieträger
+--------------------------
+Heizung:      Erdgas (zentral, Etagen-Wärmemengenzähler)
+Warmwasser:   zentral über Heizungsanlage
+
+Empfehlungen zur Verbesserung der Energieeffizienz
+----------------------------------------------------
+- Dämmung der obersten Geschossdecke
+- Austausch der Fenster im Bereich der Nordfassade (Baujahr 1962,
+  noch nicht erneuert)
+- Hydraulischer Abgleich der Heizungsanlage
+
+Gültigkeit
+----------
+Ausstellungsdatum:  14.03.2024
+Gültig bis:         13.03.2034
+
+Aussteller
+----------
+Ing.-Büro für Energieberatung Hoffmann
+Registriernummer: DE-2024-9931-EAB
+
+Hinweis: Dieser Energieausweis dient nur der Information über die
+energetische Qualität des Gebäudes und ersetzt keine technische
+Beratung vor Ort.

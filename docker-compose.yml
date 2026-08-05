@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: immobilien_rag_postgres
+    environment:
+      POSTGRES_USER: immobilien_rag
+      POSTGRES_PASSWORD: immobilien_rag
+      POSTGRES_DB: immobilien_rag
+    ports:
+      - "5432:5432"
+    volumes:
+      - immobilien_rag_pgdata:/var/lib/postgresql/data
+
+volumes:
+  immobilien_rag_pgdata:
