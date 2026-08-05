@@ -6,6 +6,79 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ---
 
+## Lauf vom 2026-08-05 20:40 (CEST) — PDF-Corpus, 8 Objekte
+
+**Was sich seit dem letzten Lauf geändert hat:**
+
+- Datenbasis auf **32 PDF-Dokumente** erweitert (8 fiktive Objekte ×
+  4 Dokumenttypen: Exposé, Energieausweis, Protokoll,
+  **Teilungserklärung neu dazugekommen**). Objekte 1-3 (Sonnenblick,
+  Gartenhof, Ahornhöhe) sind die bisherigen; Objekte 4-8 (Lindenpark,
+  Seeblick, Kastanienhof, Rosenhügel, Birkenallee) sind neu.
+- Dokumente sind jetzt **echte PDFs** (`data_pdf/`, per `reportlab`
+  generiert im Stil real recherchierter Vorlagen — stawag-Energieausweis,
+  WEG-Wissen-Protokoll), nicht mehr reiner `.txt`.
+- **Wichtiger Bugfix unterwegs gefunden:** `SimpleDirectoryReader` hatte
+  ohne das Paket `llama-index-readers-file` PDFs nicht als solche
+  erkannt und stattdessen rohe PDF-Binärdaten in den Index geschrieben
+  (kein extrahierter Text) — nach Installation des fehlenden Pakets und
+  Neuaufbau des Index behoben.
+- `similarity_top_k` von 6 auf **12** erhöht (8 statt 3 Objekte, eine
+  Vergleichsfrage kann Kontext aus bis zu 8 Energieausweisen brauchen).
+- Postgres-Tabelle umbenannt zu `immobilien_chunks_v2` (alte Tabelle mit
+  dem `.txt`-Corpus bleibt unberührt bestehen, wird aber nicht mehr
+  verwendet).
+- Aktuell 32 Chunks (1 Dokument = 1 Chunk — die Dokumente sind trotz
+  realistischerer Formatierung noch unter der 1024-Token-Grenze).
+
+**Ergebnis: 10 von 11 Testfällen wie erwartet, 1 Teilerfolg mit echter
+Erkenntnis.**
+
+| # | Kategorie | Ergebnis |
+|---|---|---|
+| 1 | Widerspruch zwischen Quellen (Sonnenblick, Wohnfläche) | ✅ |
+| 2 | Info nur in einem Dokument (Sonnenblick, Fahrstuhl) | ✅ |
+| 3 | Einfacher Fakt (Gartenhof, Kaufpreis) | ✅ |
+| 4 | Negativ-Fakt (Gartenhof, kein Fahrstuhl) | ✅ |
+| 5 | Halluzinationstest (Ahornhöhe, Sauna) | ✅ |
+| 6 | Cross-Objekt-Verwechslung (Gartenhof, Rücklage) | ✅ |
+| 7 | Vergleich über 8 Objekte (Energieeffizienzklasse) | ✅ — alle 8 korrekt, Seeblick (A+) richtig als bestes Objekt |
+| 8 | Info nur in Teilungserklärung (Lindenpark, Garten-Sondernutzungsrecht) | ✅ |
+| 9 | Widerspruch zwischen Quellen (Kastanienhof, Baujahr) | ⚠️ **Teilerfolg** — siehe unten |
+| 10 | Cross-Objekt-Verwechslung, ähnliche Neubauten (Birkenallee vs. Rosenhügel, PV-Anlage) | ✅ |
+| 11 | Halluzinationstest (Seeblick, Concierge-Service) | ✅ |
+
+### Befund zu Test #9 — Widerspruchserkennung ist nicht immer zuverlässig
+
+**Frage:** In welchem Jahr wurde das Gebäude Kastanienhof gebaut?
+
+**Erwartung:** Exposé nennt 1975, Energieausweis nennt (als "Baujahr
+Gebäude") 1974 — beide Werte sollten mit Quelle genannt werden.
+
+**Tatsächliche Antwort (3x reproduziert, konsistent):**
+> Das Gebäude Kastanienhof wurde im Jahr 1975 gebaut. Diese Information
+> stammt aus dem Exposé der Wohnung "Kastanienhof" (Dateiname:
+> objekt6_kastanienhof_expose.pdf).
+
+Der Energieausweis mit dem abweichenden Wert (`objekt6_kastanienhof_
+energieausweis.pdf`) wurde vom Retrieval korrekt gefunden und war Teil
+des Kontexts — das Modell hat den Widerspruch trotzdem nicht erkannt
+und genannt.
+
+**Vermutliche Ursache:** Bei Sonnenblick (Test #1, funktioniert)
+heißt das Feld in beiden Quellen identisch "Wohnfläche". Bei
+Kastanienhof heißt es im Exposé "Baujahr", im Energieausweis aber
+"Baujahr Gebäude" — die leicht abweichende Formulierung scheint die
+im Prompt verankerte Widerspruchserkennung ("gleicher Sachverhalt")
+zu schwächen. Das ist ein reales, reproduzierbares Limit des aktuellen
+Custom-Prompts, kein einmaliger Ausrutscher.
+
+**Mögliche nächste Schritte dazu:** Prompt könnte explizit auf
+"inhaltlich gleiche Angaben trotz unterschiedlicher Formulierung"
+hinweisen, oder Feldnamen in den Dokumenten stärker vereinheitlichen.
+
+---
+
 ## Lauf vom 2026-08-05 19:15 (CEST)
 
 **Code-/Systemstand bei diesem Lauf:**

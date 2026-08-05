@@ -36,8 +36,15 @@ stillschweigend aufgelöst zu werden. Testkatalog in tests/testfragen.py.
 - Kommentare im Code auf Deutsch oder Englisch sind beide okay
 
 ## Testdaten
-Noch keine echten Bonorum-Dokumente. Start mit selbst erzeugten, 
-realistischen Beispiel-Objektunterlagen (fiktive Exposés, 
-Energieausweise, Protokolle) zu 3-4 fiktiven Objekten, inkl. 
-bewusst eingebauter Testfälle (Informationen, die nur in einem 
-Dokument stehen; leicht widersprüchliche Angaben zwischen Dokumenten).
+Noch keine echten Bonorum-Dokumente. Selbst erzeugte, realistische
+Beispiel-Objektunterlagen zu 8 fiktiven Objekten × 4 Dokumenttypen
+(Exposé, Energieausweis, Protokoll, Teilungserklärung) = 32 PDF-
+Dokumente in `data_pdf/`, generiert per `scripts/generate_pdfs.py`
+(reportlab) im Stil real recherchierter Vorlagen (stawag-Energieausweis,
+WEG-Wissen-Protokoll — echte Vorlagen sind aus Datenschutzgründen
+praktisch nie mit echten Inhalten ausgefüllt öffentlich verfügbar).
+Objektdaten liegen in `scripts/objektdaten.py`. Bewusst eingebaute
+Testfälle (Widersprüche zwischen Quellen, Infos nur in einem Dokument,
+Cross-Objekt-Verwechslung, Halluzinationstests) — siehe
+`tests/testfragen.py` und `docs/testergebnisse.md` für dokumentierte
+Testläufe.

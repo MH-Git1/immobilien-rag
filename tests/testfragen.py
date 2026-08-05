@@ -35,14 +35,14 @@ TESTFRAGEN = [
         "erwartung": (
             "Sollte 'Aufzugstechnik Reiner GmbH' und das Prüfdatum "
             "09.11.2023 nennen, mit Quelle "
-            "objekt1_sonnenblick_protokoll.txt — diese Info steht "
+            "objekt1_sonnenblick_protokoll.pdf — diese Info steht "
             "nirgendwo sonst."
         ),
     },
     {
         "frage": "Wie hoch ist der Kaufpreis der Wohnung Gartenhof?",
         "kategorie": "Einfacher Fakt (Kontrollfrage)",
-        "erwartung": "229.000 EUR, Quelle objekt2_gartenhof_expose.txt.",
+        "erwartung": "229.000 EUR, Quelle objekt2_gartenhof_expose.pdf.",
     },
     {
         "frage": "Gibt es einen Fahrstuhl in der Wohnung Gartenhof?",
@@ -76,14 +76,59 @@ TESTFRAGEN = [
     },
     {
         "frage": (
-            "Welches der drei Objekte hat die beste Energieeffizienzklasse?"
+            "Welches Objekt hat die beste Energieeffizienzklasse? Nenne "
+            "alle Objekte mit ihrer jeweiligen Klasse."
         ),
-        "kategorie": "Vergleich über mehrere Objekte",
+        "kategorie": "Vergleich über mehrere Objekte (jetzt 8 statt 3)",
         "erwartung": (
-            "Ahornhöhe (Klasse A) ist am besten, vor Gartenhof (C) und "
-            "Sonnenblick (D). Testet, ob similarity_top_k genug Kontext "
-            "aus allen drei Objekten liefert, um einen vollständigen "
-            "Vergleich zu ermöglichen."
+            "Seeblick (A+) ist am besten, vor Rosenhügel/Ahornhöhe (A), "
+            "Birkenallee/Lindenpark (B), Gartenhof (C), Sonnenblick (D) "
+            "und Kastanienhof (F). Testet, ob similarity_top_k=12 "
+            "zuverlässig Kontext aus allen 8 Energieausweisen liefert."
+        ),
+    },
+    {
+        "frage": (
+            "Wer hat laut den Unterlagen ein Sondernutzungsrecht am "
+            "Garten bei der Wohnung Lindenpark?"
+        ),
+        "kategorie": "Information nur in der Teilungserklärung",
+        "erwartung": (
+            "Der Eigentümer der Einheit Nr. 2 (Hochparterre) hat das "
+            "exklusive Sondernutzungsrecht am Garten — diese Info steht "
+            "nur in objekt4_lindenpark_teilungserklaerung.pdf, nicht im "
+            "Exposé oder Protokoll."
+        ),
+    },
+    {
+        "frage": "In welchem Jahr wurde das Gebäude Kastanienhof gebaut?",
+        "kategorie": "Widerspruch zwischen Quellen (neu)",
+        "erwartung": (
+            "Leichte Abweichung: Exposé nennt Baujahr 1975, "
+            "Energieausweis nennt Baujahr Gebäude 1974. Sollte beide "
+            "Werte mit Quelle nennen, nicht nur einen."
+        ),
+    },
+    {
+        "frage": (
+            "Wurde bei der WEG Birkenallee eine Photovoltaikanlage "
+            "beschlossen?"
+        ),
+        "kategorie": "Cross-Objekt-Verwechslung (neu, ähnliche Neubauten)",
+        "erwartung": (
+            "Nein — diesen Beschluss gibt es nur bei Rosenhügel (einem "
+            "ähnlichen Neubau). Bei Birkenallee wurde eine PV-Anlage nur "
+            "als möglicher künftiger Tagesordnungspunkt erwähnt, aber "
+            "kein Beschluss gefasst. Testet, ob zwei ähnliche "
+            "Neubau-Objekte nicht verwechselt werden."
+        ),
+    },
+    {
+        "frage": "Gibt es einen Concierge-Service im Haus Seeblick?",
+        "kategorie": "Halluzinationstest (neu)",
+        "erwartung": (
+            "Es gibt keinen Concierge-Service in den Unterlagen. Sollte "
+            "klar sagen, dass die Information nicht vorhanden ist."
         ),
     },
 ]

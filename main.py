@@ -1,12 +1,21 @@
 """
 Objektunterlagen-Assistent (Stufe 2)
 
-Liest alle Dokumente aus data/ ein, baut daraus einen Vektor-Index in
+Liest alle Dokumente aus data_pdf/ ein, baut daraus einen Vektor-Index in
 Postgres (pgvector, siehe docker-compose.yml) und beantwortet Fragen
 dazu interaktiv in der Konsole, jeweils mit Quellenangabe.
 """
 
 import os
+
+# nltk (Abhängigkeit von LlamaIndex für Satzsegmentierung beim Chunking)
+# bringt seit 2026 einen Schutz gegen Modul-Hijacking aus dem aktuellen
+# Arbeitsverzeichnis mit (CWE-427). Der schlägt hier fälschlich an, weil
+# unser eigenes Projektverzeichnis (kein fremder/unsicherer Code) in
+# sys.path steht. Offizieller Opt-out laut nltk-Dokumentation
+# (nltk/inisec.py) — muss vor dem ersten nltk-Import gesetzt sein.
+os.environ.setdefault("NLTK_DISABLE_IMPORT_SECURITY", "1")
+
 from dotenv import load_dotenv
 import psycopg2
 
@@ -35,21 +44,23 @@ if not os.getenv("OPENAI_API_KEY"):
 Settings.embed_model = OpenAIEmbedding(model="text-embedding-3-small")
 Settings.llm = OpenAI(model="gpt-4o-mini")
 
-DATA_DIR = "data"
+DATA_DIR = "data_pdf"
 
 # Postgres/pgvector-Zugangsdaten aus .env (siehe docker-compose.yml für
 # den lokalen Container). embed_dim=1536 passt zu text-embedding-3-small.
-PG_TABLE_NAME = "immobilien_chunks"
+# Neuer Tabellenname (v2), weil der PDF-Corpus (32 Dokumente, 8 Objekte,
+# 4 Dokumenttypen) den alten Text-Corpus (9 Dokumente) ersetzt — die
+# alte Tabelle "data_immobilien_chunks" bleibt unberührt in Postgres
+# bestehen, wird aber von main.py nicht mehr verwendet.
+PG_TABLE_NAME = "immobilien_chunks_v2"
 PG_EMBED_DIM = 1536
 
 # Wie viele Chunks pro Frage aus dem Vektorspeicher geholt werden.
-# Standard wäre 2 — bei objektübergreifenden Vergleichsfragen (z.B.
-# "welches der drei Objekte hat...") reicht das nicht, weil dann Chunks
-# aus allen drei Objekten gebraucht werden. Bei aktuell 9 Chunks insgesamt
-# (1 Dokument = 1 Chunk bei dieser Dokumentgröße) ist 6 ein guter
-# Kompromiss: deckt Vergleichsfragen zuverlässig ab, ohne bei jeder Frage
-# den kompletten Datenbestand in den Prompt zu packen.
-SIMILARITY_TOP_K = 6
+# Bei 8 Objekten kann eine objektübergreifende Vergleichsfrage im
+# Prinzip Kontext aus allen 8 Energieausweisen brauchen — SIMILARITY_TOP_K
+# wird daher unten, nach dem ersten Indexaufbau, anhand der tatsächlichen
+# Chunk-Zahl kalibriert (siehe Kommentar bei der Zuweisung weiter unten).
+SIMILARITY_TOP_K = 12
 
 # Angepasster Antwort-Prompt: weist das Modell explizit an, Widersprüche
 # zwischen Quellen offenzulegen statt sich stillschweigend für eine Angabe
