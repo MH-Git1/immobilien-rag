@@ -70,8 +70,7 @@ docker-compose.yml      Postgres + pgvector Container
 
 ## Testdaten und Testmethodik
 
-Es gibt noch keine echten Bonorum-Dokumente. Die Testdaten sind
-vollständig erfunden (8 fiktive Immobilienobjekte), aber im Stil real
+Die Testdaten sind vollständig erfunden (8 fiktive Immobilienobjekte), aber im Stil real
 recherchierter Vorlagen (offizielle Muster-Energieausweise,
 WEG-Protokoll-Vorlagen) als PDF aufgebaut, um die Dokument-Ingestion
 realistisch zu testen.
