@@ -6,6 +6,38 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ---
 
+## Lauf vom 2026-08-06 00:56 (CEST) — Bestätigungslauf, erstmals mit Git-Commit verknüpft
+
+**Git-Commit:** `dbe75ceb7ad792bf7ce15c4d832cc011e0693859` ("README hinzufügen",
+gepusht nach `https://github.com/MH-Git1/immobilien-rag`)
+
+**Code-Stand:** identisch zum Lauf vom 2026-08-05 20:40 — `main.py` und
+`tests/testfragen.py` haben sich seitdem nicht verändert (per
+`git diff` gegen Commit `9ba1b36` bestätigt). Dieser Lauf dient primär
+dazu, (a) Reproduzierbarkeit zu bestätigen und (b) erstmals einen
+Testlauf mit einem echten Git-Commit-Hash zu verknüpfen, statt nur mit
+einem Zeitstempel — wie im vorherigen Eintrag als offener Punkt
+vermerkt.
+
+**Ergebnis: 10 von 11 Testfällen wie erwartet — identisch zum
+vorherigen Lauf.** Test #9 (Kastanienhof, Baujahr-Widerspruch) schlägt
+erneut fehl, exakt wie zuvor: Die Antwort nennt nur 1975 (Exposé),
+der abweichende Wert 1974 aus dem Energieausweis wird trotz korrekt
+gefundener Quelle nicht erwähnt. Das bestätigt, dass es sich um einen
+stabilen, reproduzierbaren Schwachpunkt der Widerspruchserkennung
+handelt (nicht um Zufallsrauschen des LLMs) — Ursache weiterhin
+vermutlich die unterschiedliche Feldbezeichnung ("Baujahr" vs.
+"Baujahr Gebäude"), siehe Analyse im vorherigen Eintrag.
+
+Alle übrigen 10 Antworten sind inhaltlich gleichwertig zum vorherigen
+Lauf (in der Formulierung leicht, aber nicht in der Substanz
+abweichend). Details siehe Q&A-Auflistung im Eintrag vom
+2026-08-05 20:40 unten — die Fragen, Erwartungen und Kategorien sind
+unverändert; hier nur die neue Verknüpfung mit Zeitstempel und
+Commit-Hash sowie das bestätigte Ergebnis.
+
+---
+
 ## Lauf vom 2026-08-05 20:40 (CEST) — PDF-Corpus, 8 Objekte
 
 **Was sich seit dem letzten Lauf geändert hat:**
