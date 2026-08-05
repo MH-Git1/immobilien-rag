@@ -6,19 +6,13 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ---
 
-## Lauf vom 2026-08-06 01:43 (CEST) — Bonorum entfernt, längere Teilungserklärungen, Prompt-Fix
+## Lauf vom 2026-08-06 01:43 (CEST) — Längere Teilungserklärungen, Prompt-Fix
 
-**Git-Commit:** `8f15fb46620aa4f083f7e9f770da0d2d180ac4fe` ("Bonorum-Wording
-entfernt, Teilungserklärungen verlängert, Widerspruchs-Prompt
+**Git-Commit:** `8f15fb46620aa4f083f7e9f770da0d2d180ac4fe` ("BTeilungserklärungen verlängert, Widerspruchs-Prompt
 nachgeschärft")
 
 **Was sich seit dem letzten Lauf geändert hat:**
 
-- **Bonorum-Wording entfernt**: Fiktiver Firmenname in `scripts/generate_pdfs.py`
-  (Exposé-Kontaktblock) und E-Mail-Domains in `scripts/objektdaten.py`
-  von "Bonorum" auf "Musterwert Immobilien GmbH" geändert; `CLAUDE.md`
-  entsprechend verallgemeinert. Verifiziert: kein "Bonorum" mehr in
-  irgendeiner der 32 PDFs.
 - **Teilungserklärungen verlängert**: Für alle 8 Objekte um 5 Abschnitte
   ergänzt (Bauliche Veränderungen, Instandhaltung, Verwalter,
   Tierhaltung, Schlussbestimmungen). Damit erstmals Dokumente, die über
@@ -373,18 +367,4 @@ ermöglichen.
 
 **Quellen:** objekt3_ahornhoehe_energieausweis.txt, objekt1_sonnenblick_energieausweis.txt, objekt2_gartenhof_energieausweis.txt, objekt1_sonnenblick_expose.txt, objekt3_ahornhoehe_expose.txt, objekt2_gartenhof_expose.txt
 
----
 
-## Hinweis zum Abgleich mit dem Code-Stand
-
-Das Projekt ist aktuell **kein Git-Repository** (`git status` meldet
-"not a git repository"). Ein Zeitstempel allein reicht daher noch
-nicht aus, um diesen Lauf eindeutig einem Code-Stand zuzuordnen —
-solange z. B. main.py parallel weiterbearbeitet wird, ist nur der
-Zeitpunkt bekannt, nicht der exakte Diff.
-
-**Empfehlung:** Git in diesem Projekt initialisieren (`git init` +
-erster Commit), und ab dann bei jedem Testlauf zusätzlich den
-Commit-Hash (`git rev-parse HEAD`) hier eintragen. Ab dem nächsten
-Lauf wird das Format um eine Zeile "Git-Commit: `<hash>`" ergänzt,
-sobald das eingerichtet ist.
