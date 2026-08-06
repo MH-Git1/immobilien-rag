@@ -1,0 +1,43 @@
+# Render Blueprint: definiert Web-Service (Docker) + Postgres-Datenbank
+# zusammen. Einrichtung: auf render.com "New +" -> "Blueprint" -> dieses
+# Repo auswählen. OPENAI_API_KEY und BASIC_AUTH_* müssen danach einmalig
+# im Render-Dashboard gesetzt werden (siehe README, Abschnitt Deployment)
+# — hier bewusst nicht mit Wert hinterlegt (sync: false), damit keine
+# Secrets im Repo landen.
+databases:
+  - name: immobilien-rag-db
+    plan: free
+    postgresMajorVersion: 16
+
+services:
+  - type: web
+    name: immobilien-rag
+    runtime: docker
+    plan: free
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: BASIC_AUTH_USER
+        sync: false
+      - key: BASIC_AUTH_PASSWORD
+        sync: false
+      - key: POSTGRES_HOST
+        fromDatabase:
+          name: immobilien-rag-db
+          property: host
+      - key: POSTGRES_PORT
+        fromDatabase:
+          name: immobilien-rag-db
+          property: port
+      - key: POSTGRES_DB
+        fromDatabase:
+          name: immobilien-rag-db
+          property: database
+      - key: POSTGRES_USER
+        fromDatabase:
+          name: immobilien-rag-db
+          property: user
+      - key: POSTGRES_PASSWORD
+        fromDatabase:
+          name: immobilien-rag-db
+          property: password

@@ -10,6 +10,7 @@ pypdf==6.14.2
 # Web-UI (api.py + frontend/)
 fastapi==0.128.0
 uvicorn[standard]==0.38.0
+python-multipart==0.0.32
 
 # nur für scripts/generate_pdfs.py (Testdaten-Generierung), nicht für main.py
 reportlab==5.0.0

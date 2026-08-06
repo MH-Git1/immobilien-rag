@@ -11,34 +11,74 @@
 <header class="kopfbereich">
   <h1>Objektunterlagen-Assistent</h1>
   <p>Fragen zu Exposés, Energieausweisen, Protokollen und Teilungserklärungen — mit Quellenangabe.</p>
+  <nav class="tabs">
+    <button class="tab-button aktiv" data-tab="chat">Fragen stellen</button>
+    <button class="tab-button" data-tab="upload">Objekte hochladen</button>
+  </nav>
 </header>
 
-<main id="verlauf" class="verlauf"></main>
+<main id="chat-tab" class="tab-inhalt aktiv">
+  <div id="verlauf" class="verlauf"></div>
 
-<div id="leerzustand" class="leerzustand">
-  <p>Stelle eine Frage zu einem der Objekte, z. B.</p>
-  <div class="beispiele">
-    <button class="beispiel-chip">Wie hoch ist die Wohnfläche bei Sonnenblick?</button>
-    <button class="beispiel-chip">Gibt es einen Fahrstuhl in Gartenhof?</button>
-    <button class="beispiel-chip">Welches Objekt hat die beste Energieeffizienzklasse?</button>
+  <div id="leerzustand" class="leerzustand">
+    <p>Stelle eine Frage zu einem der Objekte, z. B.</p>
+    <div class="beispiele">
+      <button class="beispiel-chip">Wie hoch ist die Wohnfläche bei Sonnenblick?</button>
+      <button class="beispiel-chip">Gibt es einen Fahrstuhl in Gartenhof?</button>
+      <button class="beispiel-chip">Welches Objekt hat die beste Energieeffizienzklasse?</button>
+    </div>
   </div>
-</div>
 
-<footer class="eingabebereich">
-  <form id="frage-formular" autocomplete="off">
+  <footer class="eingabebereich">
+    <form id="frage-formular" autocomplete="off">
+      <input
+        id="frage-eingabe"
+        type="text"
+        placeholder="Frage zu einem Objekt stellen …"
+        autocomplete="off"
+      >
+      <button type="submit" id="senden-button" aria-label="Frage senden">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+  </footer>
+</main>
+
+<main id="upload-tab" class="tab-inhalt">
+  <div class="upload-karte">
+    <label for="objekt-eingabe">Objekt</label>
     <input
-      id="frage-eingabe"
+      id="objekt-eingabe"
       type="text"
-      placeholder="Frage zu einem Objekt stellen …"
+      list="objekt-liste"
+      placeholder="Name des Objekts, z. B. Musterstraße 12"
       autocomplete="off"
     >
-    <button type="submit" id="senden-button" aria-label="Frage senden">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-        <path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <datalist id="objekt-liste"></datalist>
+
+    <div id="drop-zone" class="drop-zone">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+        <path d="M12 16V4M12 4L7 9M12 4L17 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4 16V18C4 19.1046 4.89543 20 6 20H18C19.1046 20 20 19.1046 20 18V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
-    </button>
-  </form>
-</footer>
+      <p>PDFs hierher ziehen oder <span class="link">Dateien auswählen</span></p>
+      <input id="datei-eingabe" type="file" accept="application/pdf" multiple hidden>
+    </div>
+
+    <ul id="datei-liste" class="datei-liste"></ul>
+
+    <button id="upload-button" type="button" disabled>Hochladen</button>
+
+    <p class="upload-hinweis">
+      Hinweis: In der gehosteten Demo-Umgebung (kostenlose Instanz) können
+      hochgeladene Originaldateien bei einem Neustart des Servers verloren
+      gehen. Die durchsuchbaren Inhalte selbst bleiben erhalten, da sie
+      separat in der Datenbank gespeichert werden.
+    </p>
+  </div>
+</main>
 
 <script src="app.js"></script>
 </body>

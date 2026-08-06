@@ -58,6 +58,33 @@ in `data_pdf/`) und speichert ihn in Postgres — unabhängig davon, ob
 über die Web-UI oder die Konsole gestartet wird. Bei weiteren Starts
 wird der bestehende Index geladen, ohne neu zu embedden.
 
+## Deployment
+
+Die App läuft containerisiert (siehe `Dockerfile`) und lässt sich per
+[Render](https://render.com) Blueprint (`render.yaml`) mit einer Postgres+pgvector-Datenbank
+zusammen deployen:
+
+1. Auf [render.com](https://render.com) einloggen, dann **New +** → **Blueprint** →
+   dieses GitHub-Repo auswählen. Render liest `render.yaml` und legt Web-Service
+   und Datenbank automatisch an.
+2. Im Render-Dashboard beim Web-Service unter **Environment** die Secrets setzen,
+   die bewusst nicht im Repo liegen:
+   - `OPENAI_API_KEY`
+   - `BASIC_AUTH_USER` / `BASIC_AUTH_PASSWORD` (einfacher Zugriffsschutz für die
+     öffentlich erreichbare Instanz — ohne diese beiden Variablen bleibt die App
+     ungeschützt, siehe `api.py`)
+3. Deploy abwarten. Der erste Start baut den Index neu auf (Embedding aller 32
+   Test-PDFs) — kostet einmalig ein paar Cent OpenAI-API-Kosten und dauert daher
+   beim ersten Boot spürbar länger als bei folgenden Neustarts.
+
+**Bekannte Einschränkung:** Die kostenlose Render-Instanz hat ein flüchtiges
+Dateisystem — über die Web-UI hochgeladene Original-PDFs (`data_pdf/hochgeladen_*.pdf`)
+können bei einem Neustart des Web-Service verloren gehen. Die durchsuchbaren
+Inhalte (Chunks + Embeddings) bleiben davon unberührt, da sie in der separaten
+Postgres-Datenbank liegen, nicht auf der Festplatte des Web-Service. Für einen
+produktiven Einsatz mit dauerhafter Dateiablage wäre ein persistentes Volume
+oder Objektspeicher (z. B. S3-kompatibel) der nächste Schritt.
+
 ## Projektstruktur
 
 ```
@@ -70,7 +97,9 @@ api.py                  FastAPI-Backend für die Web-UI (nutzt main.py)
 frontend/               Statisches HTML/CSS/JS-Frontend (Chat-Oberfläche)
 tests/testfragen.py     Regressions-Testkatalog (11 Fragen)
 docs/testergebnisse.md  Dokumentierte Testläufe mit Zeitstempel
-docker-compose.yml      Postgres + pgvector Container
+docker-compose.yml      Postgres + pgvector Container (lokale Entwicklung)
+Dockerfile              Image für die Web-UI (api.py), Basis für das Deployment
+render.yaml             Render Blueprint (Web-Service + Postgres/pgvector)
 ```
 
 ## Testdaten und Testmethodik

@@ -54,6 +54,44 @@ body {
   font-size: 15px;
 }
 
+.tabs {
+  display: inline-flex;
+  gap: 2px;
+  margin-top: 20px;
+  padding: 3px;
+  background: var(--oberflaeche);
+  border: 1px solid var(--rand);
+  border-radius: 12px;
+}
+
+.tab-button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-schwach);
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  padding: 7px 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab-button.aktiv {
+  color: var(--text);
+  background: var(--bg);
+}
+
+.tab-inhalt {
+  display: none;
+}
+
+.tab-inhalt.aktiv {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
 .verlauf {
   flex: 1;
   width: 100%;
@@ -247,4 +285,145 @@ body {
   .nachricht, .nachricht.antwort { max-width: 92%; }
   .kopfbereich { padding: 32px 20px 16px; }
   .kopfbereich h1 { font-size: 24px; }
+}
+
+/* Upload-Bereich */
+
+#upload-tab {
+  align-items: center;
+  padding: 24px 20px 60px;
+  overflow-y: auto;
+}
+
+.upload-karte {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.upload-karte label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-schwach);
+  margin-top: 8px;
+}
+
+#objekt-eingabe {
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text);
+  background: var(--oberflaeche);
+  border: 1px solid var(--rand);
+  border-radius: 12px;
+  padding: 12px 14px;
+  outline: none;
+}
+
+#objekt-eingabe:focus {
+  border-color: var(--akzent);
+}
+
+.drop-zone {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  color: var(--text-schwach);
+  background: var(--oberflaeche);
+  border: 1.5px dashed var(--rand);
+  border-radius: 16px;
+  padding: 36px 20px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.drop-zone svg { color: var(--text-schwach); }
+
+.drop-zone p { margin: 0; font-size: 14px; }
+
+.drop-zone .link {
+  color: var(--akzent);
+  font-weight: 500;
+}
+
+.drop-zone.ueber-ziel {
+  border-color: var(--akzent);
+  background: color-mix(in srgb, var(--akzent) 6%, var(--oberflaeche));
+}
+
+.datei-liste {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.datei-eintrag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--oberflaeche);
+  border: 1px solid var(--rand);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 13px;
+}
+
+.datei-eintrag .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.datei-eintrag .status {
+  flex-shrink: 0;
+  color: var(--text-schwach);
+  font-size: 12px;
+}
+
+.datei-eintrag .status.erledigt { color: #34c759; }
+.datei-eintrag .status.fehler { color: #ff3b30; }
+
+.datei-eintrag .entfernen {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-schwach);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+#upload-button {
+  margin-top: 14px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--akzent-text);
+  background: var(--akzent);
+  border: none;
+  border-radius: 12px;
+  padding: 13px;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+#upload-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.upload-hinweis {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-schwach);
+  line-height: 1.5;
 }

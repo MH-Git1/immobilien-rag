@@ -80,3 +80,140 @@ document.querySelectorAll(".beispiel-chip").forEach((chip) => {
     frageSenden(chip.textContent);
   });
 });
+
+// --- Tabs ---
+
+document.querySelectorAll(".tab-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".tab-button").forEach((b) => b.classList.remove("aktiv"));
+    document.querySelectorAll(".tab-inhalt").forEach((t) => t.classList.remove("aktiv"));
+    button.classList.add("aktiv");
+    document.getElementById(`${button.dataset.tab}-tab`).classList.add("aktiv");
+  });
+});
+
+// --- Upload ---
+
+const objektEingabe = document.getElementById("objekt-eingabe");
+const objektListe = document.getElementById("objekt-liste");
+const dropZone = document.getElementById("drop-zone");
+const dateiEingabe = document.getElementById("datei-eingabe");
+const dateiListeEl = document.getElementById("datei-liste");
+const uploadButton = document.getElementById("upload-button");
+
+let ausgewaehlteDateien = [];
+
+async function bekannteObjekteLaden() {
+  try {
+    const response = await fetch("/api/objekte");
+    const objekte = await response.json();
+    objektListe.innerHTML = objekte
+      .map((name) => `<option value="${escapeHtml(name)}"></option>`)
+      .join("");
+  } catch (fehler) {
+    // Datalist ist nur eine Komfortfunktion — bei Fehler einfach leer lassen.
+  }
+}
+
+function uploadButtonAktualisieren() {
+  uploadButton.disabled =
+    ausgewaehlteDateien.length === 0 || objektEingabe.value.trim() === "";
+}
+
+function dateiListeRendern() {
+  dateiListeEl.innerHTML = ausgewaehlteDateien
+    .map(
+      (eintrag, index) => `
+      <li class="datei-eintrag" data-index="${index}">
+        <span class="name">${escapeHtml(eintrag.datei.name)}</span>
+        <span class="status ${eintrag.statusKlasse || ""}">${eintrag.status}</span>
+        ${eintrag.entfernbar ? '<button class="entfernen" aria-label="Entfernen">×</button>' : ""}
+      </li>`
+    )
+    .join("");
+  uploadButtonAktualisieren();
+}
+
+function dateienHinzufuegen(fileList) {
+  Array.from(fileList).forEach((datei) => {
+    if (datei.type !== "application/pdf") return;
+    const bereitsDrin = ausgewaehlteDateien.some(
+      (e) => e.datei.name === datei.name && e.datei.size === datei.size
+    );
+    if (bereitsDrin) return;
+    ausgewaehlteDateien.push({ datei, status: "wartet", statusKlasse: "", entfernbar: true });
+  });
+  dateiListeRendern();
+}
+
+dropZone.addEventListener("click", () => dateiEingabe.click());
+
+dateiEingabe.addEventListener("change", () => {
+  dateienHinzufuegen(dateiEingabe.files);
+  dateiEingabe.value = "";
+});
+
+["dragover", "dragenter"].forEach((ereignis) => {
+  dropZone.addEventListener(ereignis, (e) => {
+    e.preventDefault();
+    dropZone.classList.add("ueber-ziel");
+  });
+});
+
+["dragleave", "dragend"].forEach((ereignis) => {
+  dropZone.addEventListener(ereignis, () => dropZone.classList.remove("ueber-ziel"));
+});
+
+dropZone.addEventListener("drop", (e) => {
+  e.preventDefault();
+  dropZone.classList.remove("ueber-ziel");
+  dateienHinzufuegen(e.dataTransfer.files);
+});
+
+dateiListeEl.addEventListener("click", (e) => {
+  const button = e.target.closest(".entfernen");
+  if (!button) return;
+  const index = Number(button.closest(".datei-eintrag").dataset.index);
+  ausgewaehlteDateien.splice(index, 1);
+  dateiListeRendern();
+});
+
+objektEingabe.addEventListener("input", uploadButtonAktualisieren);
+
+uploadButton.addEventListener("click", async () => {
+  const objektName = objektEingabe.value.trim();
+  if (!objektName || ausgewaehlteDateien.length === 0) return;
+
+  uploadButton.disabled = true;
+  ausgewaehlteDateien.forEach((e) => {
+    e.status = "wird hochgeladen …";
+    e.entfernbar = false;
+  });
+  dateiListeRendern();
+
+  const formData = new FormData();
+  formData.append("objekt_name", objektName);
+  ausgewaehlteDateien.forEach((e) => formData.append("dateien", e.datei));
+
+  try {
+    const response = await fetch("/api/upload", { method: "POST", body: formData });
+    if (!response.ok) {
+      throw new Error(`Server-Fehler (${response.status})`);
+    }
+    await response.json();
+    ausgewaehlteDateien.forEach((e) => {
+      e.status = "erledigt";
+      e.statusKlasse = "erledigt";
+    });
+    await bekannteObjekteLaden();
+  } catch (fehler) {
+    ausgewaehlteDateien.forEach((e) => {
+      e.status = "Fehler";
+      e.statusKlasse = "fehler";
+    });
+  }
+
+  dateiListeRendern();
+});
+
+bekannteObjekteLaden();
