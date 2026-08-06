@@ -13,7 +13,8 @@ Einträge.
 
 ## Lauf vom 2026-08-06 02:28 (CEST) — Echtes Token-Chunking mit Overlap
 
-**Git-Commit:** wird nach diesem Commit ergänzt (siehe unten).
+**Git-Commit:** `ef6c9055d9f5e69fe2883f18411caa8b85e85ed9` ("Echtes
+Token-Chunking mit Overlap getestet (Ahornhöhe-Protokoll verlängert)")
 
 **Was sich seit dem letzten Lauf geändert hat:**
 
