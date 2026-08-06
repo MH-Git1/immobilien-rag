@@ -8,8 +8,8 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ## Lauf vom 2026-08-06 02:13 (CEST) — Metadaten-Filterung + automatisierte Bewertung (LLM-Richter)
 
-**Git-Commit:** `3aeff3839c272388ac3cf2387b178fe6c55d9ce0` ("Metadaten-Filterung
-(Retrieval) und LLM-als-Richter (automatisierte Tests)")
+**Git-Commit:** `214fc92` ("Metadaten-Filterung (Retrieval) und
+LLM-als-Richter (automatisierte Tests)")
 
 **Was sich seit dem letzten Lauf geändert hat:**
 
