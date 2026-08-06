@@ -29,6 +29,7 @@ from llama_index.core import (
     PromptTemplate,
 )
 from llama_index.core.callbacks import CallbackManager, TokenCountingHandler
+from llama_index.core.postprocessor import LLMRerank
 from llama_index.core.vector_stores import MetadataFilter, MetadataFilters
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
@@ -69,6 +70,18 @@ PG_EMBED_DIM = 1536
 # wird daher unten, nach dem ersten Indexaufbau, anhand der tatsächlichen
 # Chunk-Zahl kalibriert (siehe Kommentar bei der Zuweisung weiter unten).
 SIMILARITY_TOP_K = 12
+
+# Optionales Reranking: holt wie bisher SIMILARITY_TOP_K Chunks per
+# Vektor-Ähnlichkeit, lässt sie danach zusätzlich vom LLM nach
+# tatsächlicher Relevanz zur Frage neu bewerten und behält nur die
+# RERANK_TOP_N besten für die Antwortgenerierung (LLMRerank-
+# Postprocessor, siehe beantworte_frage()). Per Env-Var togglebar, da
+# noch nicht klar war, ob sich das beim aktuellen Corpus-Umfang (~40
+# Chunks) überhaupt lohnt, oder nur zusätzliche Kosten/Latenz ohne
+# messbaren Nutzen verursacht -- siehe docs/testergebnisse.md für den
+# Vergleich mit/ohne Reranking.
+AKTIVIERE_RERANKING = os.getenv("AKTIVIERE_RERANKING", "false").lower() == "true"
+RERANK_TOP_N = 5
 
 # Angepasster Antwort-Prompt: weist das Modell explizit an, Widersprüche
 # zwischen Quellen offenzulegen statt sich stillschweigend für eine Angabe
@@ -236,8 +249,16 @@ def beantworte_frage(
     urspruenglicher_callback_manager = Settings.callback_manager
     Settings.callback_manager = CallbackManager([token_zaehler])
     try:
+        node_postprocessors = []
+        if AKTIVIERE_RERANKING:
+            node_postprocessors.append(
+                LLMRerank(top_n=RERANK_TOP_N, llm=Settings.llm)
+            )
+
         query_engine = index.as_query_engine(
-            similarity_top_k=SIMILARITY_TOP_K, filters=filters
+            similarity_top_k=SIMILARITY_TOP_K,
+            filters=filters,
+            node_postprocessors=node_postprocessors,
         )
         query_engine.update_prompts(
             {"response_synthesizer:text_qa_template": QA_PROMPT}

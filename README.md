@@ -24,6 +24,15 @@ Frage → Embedding → Vektorsuche (top_k Chunks) → LLM mit Kontext → Antwo
 4. **Generation**: Ein angepasster Prompt schickt die gefundenen Chunks zusammen mit der Frage an `gpt-4o-mini`. Der Prompt weist das Modell explizit an, Widersprüche zwischen Quellen offenzulegen statt sie stillschweigend aufzulösen, und nichts zu erfinden, was nicht im Kontext steht.
 5. **Antwort**: Wird inklusive der verwendeten Quelldokumente (mit Ähnlichkeits-Score) ausgegeben — entweder im Browser (Web-UI) oder in der Konsole.
 
+**Optionales Reranking:** `main.py` unterstützt zusätzlich einen
+LLM-Reranking-Schritt nach dem Retrieval (`AKTIVIERE_RERANKING=true`
+in `.env`). Im Testkatalog gemessen (siehe `docs/testergebnisse.md`,
+Lauf vom 2026-08-06) verschlechtert er beim aktuellen Corpus-Umfang
+die Trefferquote bei objektübergreifenden Vergleichsfragen (zu
+aggressives Aussieben von Kontext) — bleibt daher standardmäßig
+deaktiviert, ist aber für einen künftig größeren Corpus als getestete
+Option vorhanden.
+
 ## Tech-Stack
 
 - Python 3.12

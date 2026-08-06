@@ -11,6 +11,180 @@ Einträge.
 
 ---
 
+## Lauf vom 2026-08-06 06:38 (CEST) — Reranking objektiv gemessen: hilft hier nicht, bleibt standardmäßig aus
+
+**Git-Commit:** wird nach diesem Commit ergänzt
+
+**Ziel dieses Laufs:** Retrieval-Qualität systematisch verbessern
+(Hybrid-Suche oder Reranking) und mit dem bestehenden LLM-Richter-
+Testkatalog **objektiv messen**, ob es tatsächlich hilft — nicht blind
+aktivieren. Hybrid-Suche hätte einen kompletten Neuaufbau der
+Vektor-Tabelle (inkl. Produktionsinstanz auf Render) erfordert, daher
+zunächst **LLM-Reranking** umgesetzt: `SIMILARITY_TOP_K=12` Chunks wie
+bisher per Vektor-Ähnlichkeit holen, danach zusätzlich per
+`LLMRerank`-Postprocessor (LlamaIndex-Bordmittel, nutzt das bestehende
+LLM, keine neue Abhängigkeit) auf `RERANK_TOP_N=5` die relevantesten
+eindampfen. Umschaltbar über die Umgebungsvariable
+`AKTIVIERE_RERANKING` (siehe `main.py`), Standard: aus.
+
+**Ergebnis: Reranking verschlechtert die Trefferquote (12/13 statt
+13/13) und wird daher NICHT standardmäßig aktiviert.**
+
+Betroffen ist ausschließlich Testfall 7 (objektübergreifender
+Vergleich über alle 8 Energieausweise): Mit `RERANK_TOP_N=5` werden
+nach dem Reranking nur noch 5 der ursprünglich 12 abgerufenen Chunks
+für die Antwortgenerierung behalten — bei einer Frage, die Kontext aus
+möglichst vielen der 8 Objekte braucht, gehen dadurch 3–4 Objekte
+verloren, obwohl `SIMILARITY_TOP_K=12` ursprünglich genau für solche
+Vergleichsfragen hochgesetzt wurde (siehe Kommentar in `main.py`).
+Interessanterweise war Reranking dabei nicht einmal spürbar teurer
+oder langsamer (siehe Protokoll-Vergleich unten) — das Problem ist
+nicht Kosten/Latenz, sondern zu aggressives Aussieben von Kontext bei
+Fragen, die breite Abdeckung statt hoher Präzision brauchen.
+
+**Quantitativer Vergleich** (aus `anfrage_protokoll`, beide Läufe
+direkt nacheinander mit identischem Code-Stand außer der
+Reranking-Umschaltung):
+
+| | Ø Latenz | Summe geschätzte Kosten | Ø Prompt-Tokens | Ergebnis |
+|---|---|---|---|---|
+| Ohne Reranking (Baseline) | 2996 ms | 0,00877 $ | 4159 | 13/13 |
+| Mit Reranking | 2624 ms | 0,00867 $ | 4108 | 12/13 |
+
+**Einordnung:** Bei einem größeren Corpus (deutlich mehr als ~40
+Chunks, z. B. bei echten Bonorum-Unterlagen mit vielen Objekten) könnte
+sich das Verhältnis umkehren, da dort mehr semantisches Rauschen in den
+Top-12-Treffern zu erwarten ist und Reranking dort eher einen
+Präzisionsgewinn bringen könnte. Beim aktuellen Testcorpus überwiegt
+der Nachteil (verlorene Breite bei Vergleichsfragen) klar den
+möglichen Vorteil. Die Funktion bleibt daher als optionale, per Env-Var
+zuschaltbare Möglichkeit im Code, ist aber standardmäßig deaktiviert —
+eine ehrlich gemessene Entscheidung statt einer ungeprüften Annahme,
+dass mehr Verarbeitungsschritte automatisch bessere Ergebnisse liefern.
+
+**Hinweis zur Vollständigkeit dieses Eintrags:** Die Baseline
+("ohne Reranking") verhält sich unverändert zum letzten dokumentierten
+Lauf (13/13, siehe Eintrag vom 2026-08-06 02:28 weiter unten) — deren
+vollständige Frage/Antwort-Paare werden hier nicht erneut abgedruckt,
+um reine Redundanz zu vermeiden. Der Lauf **mit** Reranking (die neue,
+bisher nicht dokumentierte Systemkonfiguration) ist unten vollständig
+mit allen 13 Fragen, Antworten, Quellen und Richter-Begründungen
+dokumentiert.
+
+### Testfälle mit aktiviertem Reranking (`AKTIVIERE_RERANKING=true`)
+
+**1/13 PASS — Widerspruch zwischen Quellen**
+Frage: Wie groß ist die Wohnfläche der Wohnung Sonnenblick?
+Filter: objekt_name = sonnenblick
+Erwartung: Sollte beide Werte nennen (78 m² im Exposé, 76 m² im Energieausweis) und den Widerspruch explizit benennen, statt sich stillschweigend für einen Wert zu entscheiden.
+Antwort: Die Wohnfläche der Wohnung "Sonnenblick" wird in zwei verschiedenen Quellen unterschiedlich angegeben. Im Exposé wird die Wohnfläche mit 78 m² angegeben, während im Energieausweis eine Wohnfläche von 76 m² angegeben ist. Exposé: 78 m², Energieausweis: 76 m². Diese unterschiedlichen Angaben stellen einen Widerspruch dar.
+Quellen: objekt1_sonnenblick_energieausweis.pdf, objekt1_sonnenblick_expose.pdf
+Richter: PASS — Die Antwort nennt beide Werte der Wohnfläche und benennt den Widerspruch zwischen den Quellen klar und deutlich.
+
+**2/13 PASS — Information nur in einem Dokument**
+Frage: Welche Firma wartet den Fahrstuhl im Haus Sonnenblick und wann war die letzte Prüfung?
+Filter: objekt_name = sonnenblick
+Erwartung: Sollte 'Aufzugstechnik Reiner GmbH' und das Prüfdatum 09.11.2023 nennen. Diese Info steht nur im Protokoll — Prüfung anhand der Quellen-Liste, nicht anhand des Antworttexts.
+Antwort: Die Firma, die den Fahrstuhl im Haus Sonnenblick wartet, ist die "Aufzugstechnik Reiner GmbH". Die letzte Prüfung durch den TÜV Süd fand am 09.11.2023 statt.
+Quellen: objekt1_sonnenblick_protokoll.pdf
+Richter: PASS — Die Antwort nennt korrekt die Firma und das Prüfdatum.
+
+**3/13 PASS — Einfacher Fakt (Kontrollfrage)**
+Frage: Wie hoch ist der Kaufpreis der Wohnung Gartenhof?
+Filter: objekt_name = gartenhof
+Erwartung: 229.000 EUR, Quelle objekt2_gartenhof_expose.pdf.
+Antwort: Der Kaufpreis der Wohnung "Gartenhof" beträgt 229.000 EUR, wie im Exposé angegeben. Es gibt keine abweichenden Angaben zu diesem Sachverhalt in den bereitgestellten Kontextinformationen.
+Quellen: objekt2_gartenhof_energieausweis.pdf, objekt2_gartenhof_expose.pdf
+Richter: PASS — Korrekter Kaufpreis, korrekter Quellenverweis.
+
+**4/13 PASS — Negativ-Fakt**
+Frage: Gibt es einen Fahrstuhl in der Wohnung Gartenhof?
+Filter: objekt_name = gartenhof
+Erwartung: Nein — laut Exposé kein Fahrstuhl (Erdgeschoss, nicht erforderlich).
+Antwort: In der Wohnung "Gartenhof" gibt es keinen Fahrstuhl, da dies im Exposé ausdrücklich erwähnt wird: "Kein Fahrstuhl (nicht erforderlich, da Erdgeschoss)." Es sind keine widersprüchlichen Angaben vorhanden.
+Quellen: objekt2_gartenhof_expose.pdf, objekt2_gartenhof_teilungserklaerung.pdf
+Richter: PASS
+
+**5/13 PASS — Halluzinationstest**
+Frage: Wann wurde die Sauna im Haus Ahornhöhe zuletzt gewartet?
+Filter: objekt_name = ahornhöhe
+Erwartung: Es gibt keine Sauna in den Unterlagen. Sollte klar sagen, dass die Information nicht vorhanden ist.
+Antwort: Die Informationen im Kontext enthalten keine Angaben zur Wartung einer Sauna im Haus Ahornhöhe. Daher kann ich keine Antwort auf die Frage geben.
+Quellen: objekt3_ahornhöhe_protokoll.pdf
+Richter: PASS
+
+**6/13 PASS — Cross-Objekt-Verwechslung**
+Frage: Wurde bei der WEG Gartenhof eine Erhöhung der Instandhaltungsrücklage beschlossen?
+Filter: objekt_name = gartenhof
+Erwartung: Diesen Beschluss gibt es nur bei Sonnenblick, nicht bei Gartenhof. Korrekte Antwort ist 'nicht enthalten'.
+Antwort: Im bereitgestellten Kontext sind keine Informationen über eine Erhöhung der Instandhaltungsrücklage bei der WEG Gartenhof enthalten. Daher kann ich nicht bestätigen, ob eine solche Erhöhung beschlossen wurde oder nicht.
+Quellen: objekt2_gartenhof_protokoll.pdf, objekt2_gartenhof_teilungserklaerung.pdf
+Richter: PASS
+
+**7/13 FAIL — Vergleich über mehrere Objekte (der durch Reranking beeinträchtigte Fall)**
+Frage: Welches Objekt hat die beste Energieeffizienzklasse? Nenne alle Objekte mit ihrer jeweiligen Klasse.
+Erwartung: Seeblick (A+) ist am besten, vor Rosenhügel/Ahornhöhe (A), Birkenallee/Lindenpark (B), Gartenhof (C), Sonnenblick (D) und Kastanienhof (F). Testet, ob genug Kontext aus allen 8 Energieausweisen zusammenkommt.
+Antwort: Die Energieeffizienzklassen der Objekte sind wie folgt: 1. Seeblick: A+, 2. Ahornhöhe: A, 3. Rosenhügel: A, 4. Birkenallee: B. Das Objekt mit der besten Energieeffizienzklasse ist Seeblick mit der Klasse A+.
+Quellen: objekt3_ahornhöhe_energieausweis.pdf, objekt3_ahornhöhe_protokoll.pdf, objekt5_seeblick_energieausweis.pdf, objekt7_rosenhügel_energieausweis.pdf, objekt8_birkenallee_energieausweis.pdf
+Richter: FAIL — Die Antwort listet nicht alle Objekte mit ihren jeweiligen Energieeffizienzklassen auf und enthält somit unvollständige Informationen.
+**Analyse:** Nur 5 statt 8 Objekte in den Quellen (genau `RERANK_TOP_N=5`) — das Reranking hat die 4 anderen Energieausweise, die für eine vollständige Antwort nötig gewesen wären, aus dem Kontext entfernt.
+
+**8/13 PASS — Information nur in der Teilungserklärung**
+Frage: Wer hat laut den Unterlagen ein Sondernutzungsrecht am Garten bei der Wohnung Lindenpark?
+Filter: objekt_name = lindenpark
+Erwartung: Der Eigentümer der Einheit Nr. 2 (Hochparterre) hat das exklusive Sondernutzungsrecht am Garten.
+Antwort: Laut den Unterlagen hat der Eigentümer der Einheit Nr. 2 (Hochparterre) das ausschließliche Sondernutzungsrecht an der Gartenfläche im Hinterhof. Alle übrigen Einheiten haben kein Nutzungsrecht an dieser Fläche.
+Quellen: objekt4_lindenpark_teilungserklaerung.pdf
+Richter: PASS
+
+**9/13 PASS — Widerspruch zwischen Quellen (unterschiedlich benannte Felder)**
+Frage: In welchem Jahr wurde das Gebäude Kastanienhof gebaut?
+Filter: objekt_name = kastanienhof
+Erwartung: Exposé nennt Baujahr 1975, Energieausweis nennt Baujahr Gebäude 1974. Sollte beide Werte mit Quelle nennen.
+Antwort: Das Gebäude Kastanienhof wurde laut dem Exposé im Jahr 1975 gebaut. Im Energieausweis wird jedoch das Baujahr des Gebäudes mit 1974 angegeben. Dies stellt einen Widerspruch dar. Exposé: 1975, Energieausweis: 1974.
+Quellen: objekt6_kastanienhof_energieausweis.pdf, objekt6_kastanienhof_expose.pdf, objekt6_kastanienhof_teilungserklaerung.pdf
+Richter: PASS
+
+**10/13 PASS — Cross-Objekt-Verwechslung (ähnliche Neubauten)**
+Frage: Wurde bei der WEG Birkenallee eine Photovoltaikanlage beschlossen?
+Filter: objekt_name = birkenallee
+Erwartung: Nein — diesen Beschluss gibt es nur bei Rosenhügel. Bei Birkenallee nur als möglicher künftiger Tagesordnungspunkt erwähnt.
+Antwort: Nein, bei der WEG Birkenallee wurde keine Photovoltaikanlage beschlossen. In der Eigentümerversammlung am 08.06.2024 wurde lediglich angeregt, die Möglichkeit einer Photovoltaikanlage bei Bedarf für eine der nächsten Versammlungen vorzubereiten. Ein konkreter Beschluss wurde jedoch nicht gefasst.
+Quellen: objekt8_birkenallee_protokoll.pdf, objekt8_birkenallee_teilungserklaerung.pdf
+Richter: PASS
+
+**11/13 PASS — Halluzinationstest**
+Frage: Gibt es einen Concierge-Service im Haus Seeblick?
+Filter: objekt_name = seeblick
+Erwartung: Es gibt keinen Concierge-Service in den Unterlagen.
+Antwort: Die Informationen im Kontext enthalten keine Angaben zu einem Concierge-Service im Haus Seeblick. Daher kann ich nicht bestätigen, ob ein solcher Service vorhanden ist oder nicht.
+Quellen: objekt5_seeblick_expose.pdf, objekt5_seeblick_protokoll.pdf, objekt5_seeblick_teilungserklaerung.pdf
+Richter: PASS
+
+**12/13 PASS — Mehrseitiges Dokument (Chunking über Seitengrenze)**
+Frage: Welche Hausverwaltung ist laut Teilungserklärung als Verwalter der WEG Lindenpark bestellt?
+Filter: objekt_name = lindenpark
+Erwartung: Hausverwaltung Baumann, Verwalter-Abschnitt steht auf Seite 2 der Teilungserklärung.
+Antwort: Laut Teilungserklärung ist die Hausverwaltung Baumann als Verwalter der Wohnungseigentümergemeinschaft (WEG) Lindenpark bestellt. Dies ist in der Quelle auf Seite 2 angegeben.
+Quellen: objekt4_lindenpark_teilungserklaerung.pdf
+Richter: PASS
+
+**13/13 PASS — Echtes Chunking mit Token-Overlap**
+Frage: Wer wurde bei der WEG Ahornhöhe zum Vorsitzenden des Verwaltungsbeirats gewählt?
+Filter: objekt_name = ahornhöhe
+Erwartung: Antwort sollte 'Herr T. Nowak' nennen (Hintergrund zum Testdesign, kein Bewertungskriterium: absichtlich per Overlap-Chunking erreichbarer Fakt).
+Antwort: Herr T. Nowak wurde zum Vorsitzenden des Verwaltungsbeirats der WEG Ahornhöhe gewählt. Dies wird in den Kontextinformationen unter TOP 8 der Eigentümerversammlung erwähnt.
+Quellen: objekt3_ahornhöhe_protokoll.pdf
+Richter: PASS
+
+**Entscheidung:** `AKTIVIERE_RERANKING` bleibt standardmäßig `false`.
+Reranking ist als Option im Code erhalten (z. B. für einen künftig
+deutlich größeren Corpus mit echten Bonorum-Unterlagen erneut zu
+prüfen), aber ohne messbaren Nutzen beim aktuellen Testcorpus nicht
+aktiv.
+
+---
+
 ## Lauf vom 2026-08-06 02:28 (CEST) — Echtes Token-Chunking mit Overlap
 
 **Git-Commit:** `ef6c9055d9f5e69fe2883f18411caa8b85e85ed9` ("Echtes
