@@ -226,6 +226,7 @@ uploadButton.addEventListener("click", async () => {
       e.statusKlasse = "erledigt";
     });
     await bekannteObjekteLaden();
+    await objekteUebersichtLaden();
   } catch (fehler) {
     ausgewaehlteDateien.forEach((e) => {
       e.status = "Fehler";
@@ -237,3 +238,111 @@ uploadButton.addEventListener("click", async () => {
 });
 
 bekannteObjekteLaden();
+
+// --- Objekt-Übersicht ---
+
+const objekteListeBereich = document.getElementById("objekte-liste-bereich");
+
+// Reihenfolge der Dokumenttypen, aus denen ein Feld bevorzugt entnommen
+// wird, wenn mehrere Quellen einen Wert dafür haben (z.B. Baujahr eher
+// aus dem Energieausweis als aus dem Exposé). Nennen zwei Quellen
+// unterschiedliche Werte, wird das trotzdem als Widerspruch markiert —
+// die Priorität entscheidet nur, welcher Wert prominent angezeigt wird.
+const FELD_PRIORITAET = {
+  kaufpreis_eur: ["expose"],
+  wohnflaeche_qm: ["expose", "energieausweis"],
+  zimmer: ["expose"],
+  etage: ["expose", "teilungserklaerung"],
+  hausgeld_eur_monatlich: ["expose"],
+  baujahr: ["energieausweis", "expose"],
+  energieeffizienzklasse: ["energieausweis"],
+};
+
+const FELDER = [
+  { key: "kaufpreis_eur", label: "Kaufpreis", format: (v) => `${Number(v).toLocaleString("de-DE")} €` },
+  { key: "wohnflaeche_qm", label: "Wohnfläche", format: (v) => `${v} m²` },
+  { key: "zimmer", label: "Zimmer", format: (v) => `${v}` },
+  { key: "baujahr", label: "Baujahr", format: (v) => `${v}` },
+  { key: "energieeffizienzklasse", label: "Energieeffizienz", format: (v) => v },
+  { key: "hausgeld_eur_monatlich", label: "Hausgeld", format: (v) => `${v} €/Monat` },
+  { key: "etage", label: "Etage", format: (v) => v },
+];
+
+function dokumenttypAusDateiname(dateiname) {
+  for (const typ of ["expose", "energieausweis", "protokoll", "teilungserklaerung"]) {
+    if (dateiname.includes(typ)) return typ;
+  }
+  return "unbekannt";
+}
+
+function feldZusammenfassen(zeilen, feldKey) {
+  const werte = zeilen
+    .map((z) => ({ wert: z[feldKey], typ: dokumenttypAusDateiname(z.dateiname) }))
+    .filter((w) => w.wert !== null && w.wert !== undefined && w.wert !== "");
+  if (werte.length === 0) return null;
+
+  const eindeutigeWerte = new Set(werte.map((w) => String(w.wert)));
+  const widerspruch = eindeutigeWerte.size > 1;
+
+  let ausgewaehlt = werte[0];
+  for (const typ of FELD_PRIORITAET[feldKey] || []) {
+    const treffer = werte.find((w) => w.typ === typ);
+    if (treffer) {
+      ausgewaehlt = treffer;
+      break;
+    }
+  }
+
+  return { wert: ausgewaehlt.wert, widerspruch, alleWerte: werte };
+}
+
+function objektKarteRendern(objektName, zeilen) {
+  const felderHtml = FELDER.map((feld) => {
+    const ergebnis = feldZusammenfassen(zeilen, feld.key);
+    if (!ergebnis) return "";
+    const titel = ergebnis.widerspruch
+      ? `Abweichende Angaben: ${ergebnis.alleWerte.map((w) => `${w.typ} = ${w.wert}`).join(" · ")}`
+      : "";
+    return `
+      <div class="kennzahl-zeile">
+        <span class="kennzahl-label">${escapeHtml(feld.label)}</span>
+        <span class="kennzahl-wert"${titel ? ` title="${escapeHtml(titel)}"` : ""}>
+          ${escapeHtml(feld.format(ergebnis.wert))}${ergebnis.widerspruch ? ' <span class="widerspruch-marker">⚠</span>' : ""}
+        </span>
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="objekt-karte">
+      <h3>${escapeHtml(objektName)}</h3>
+      <div class="kennzahlen-liste">
+        ${felderHtml || '<p class="keine-daten">Keine Kennzahlen extrahiert.</p>'}
+      </div>
+    </div>`;
+}
+
+async function objekteUebersichtLaden() {
+  try {
+    const response = await fetch("/api/kennzahlen");
+    const zeilen = await response.json();
+
+    const jeObjekt = {};
+    for (const zeile of zeilen) {
+      (jeObjekt[zeile.objekt_name] ??= []).push(zeile);
+    }
+
+    const objektNamen = Object.keys(jeObjekt).sort();
+    if (objektNamen.length === 0) {
+      objekteListeBereich.innerHTML = '<p class="objekte-lade-hinweis">Noch keine Objekte vorhanden.</p>';
+      return;
+    }
+
+    objekteListeBereich.innerHTML = objektNamen
+      .map((name) => objektKarteRendern(name, jeObjekt[name]))
+      .join("");
+  } catch (fehler) {
+    objekteListeBereich.innerHTML = '<p class="objekte-lade-hinweis">Objekte konnten nicht geladen werden.</p>';
+  }
+}
+
+objekteUebersichtLaden();
