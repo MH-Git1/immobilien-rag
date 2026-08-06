@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Objektunterlagen-Assistent</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="kopfbereich">
+  <h1>Objektunterlagen-Assistent</h1>
+  <p>Fragen zu Exposés, Energieausweisen, Protokollen und Teilungserklärungen — mit Quellenangabe.</p>
+</header>
+
+<main id="verlauf" class="verlauf"></main>
+
+<div id="leerzustand" class="leerzustand">
+  <p>Stelle eine Frage zu einem der Objekte, z. B.</p>
+  <div class="beispiele">
+    <button class="beispiel-chip">Wie hoch ist die Wohnfläche bei Sonnenblick?</button>
+    <button class="beispiel-chip">Gibt es einen Fahrstuhl in Gartenhof?</button>
+    <button class="beispiel-chip">Welches Objekt hat die beste Energieeffizienzklasse?</button>
+  </div>
+</div>
+
+<footer class="eingabebereich">
+  <form id="frage-formular" autocomplete="off">
+    <input
+      id="frage-eingabe"
+      type="text"
+      placeholder="Frage zu einem Objekt stellen …"
+      autocomplete="off"
+    >
+    <button type="submit" id="senden-button" aria-label="Frage senden">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </form>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
