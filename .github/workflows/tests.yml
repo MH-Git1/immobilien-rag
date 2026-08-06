@@ -1,0 +1,50 @@
+name: Testkatalog
+
+# Läuft bei Push auf main (nicht auf jedem Branch/PR) und lässt sich
+# manuell auslösen — jeder Lauf kostet echtes OpenAI-API-Guthaben
+# (Embedding des kompletten Corpus + 13 Fragen + 13 Richter-Calls),
+# daher bewusst nicht auf jeden Branch/PR ausgeweitet.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  testkatalog:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_DB: immobilien_rag
+          POSTGRES_USER: immobilien_rag
+          POSTGRES_PASSWORD: immobilien_rag
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: immobilien_rag
+      POSTGRES_USER: immobilien_rag
+      POSTGRES_PASSWORD: immobilien_rag
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Abhängigkeiten installieren
+        run: pip install -r requirements.txt
+
+      - name: Testkatalog ausführen (baut Index neu, da Postgres-Service leer startet)
+        run: python -m tests.testfragen

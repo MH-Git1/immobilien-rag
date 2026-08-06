@@ -19,6 +19,8 @@ Aufruf: venv/bin/python -m tests.testfragen
 (vom Projekt-Root aus)
 """
 
+import sys
+
 from llama_index.core import Settings
 
 from main import baue_index, beantworte_frage, _bekannte_objektnamen
@@ -229,7 +231,8 @@ TESTFRAGEN = [
 ]
 
 
-def fuehre_tests_aus() -> None:
+def fuehre_tests_aus() -> bool:
+    """Gibt True zurück, wenn alle Testfälle bestanden wurden (für CI-Exitcode)."""
     index = baue_index()
     bekannte_objekte = _bekannte_objektnamen()
 
@@ -265,6 +268,8 @@ def fuehre_tests_aus() -> None:
         ]
         print(f"Fehlgeschlagen: Testfall(-fälle) {fehlgeschlagen}")
 
+    return bestanden == len(ergebnisse)
+
 
 if __name__ == "__main__":
-    fuehre_tests_aus()
+    sys.exit(0 if fuehre_tests_aus() else 1)
