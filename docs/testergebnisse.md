@@ -2,7 +2,390 @@
 
 Dieses Dokument protokolliert Testläufe des RAG-Systems mit Zeitstempel,
 damit sich ein Ergebnis-Snapshot später einem bestimmten Code-Stand
-zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
+zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`. Neue Läufe
+werden **oben** als neuer Abschnitt ergänzt, ältere Läufe bleiben
+vollständig erhalten (kein Überschreiben/Löschen). Ab diesem Lauf wird
+jeder Testfall mit vollständiger Frage, Erwartung, Antwort, Quellen und
+Richter-Begründung dokumentiert, nicht nur als Verweis auf frühere
+Einträge.
+
+---
+
+## Lauf vom 2026-08-06 02:28 (CEST) — Echtes Token-Chunking mit Overlap
+
+**Git-Commit:** wird nach diesem Commit ergänzt (siehe unten).
+
+**Was sich seit dem letzten Lauf geändert hat:**
+
+- **Letzter offener technischer Punkt behoben**: Bisher wurde
+  "Chunking" nur über PDF-Seitengrenzen getestet (PDFReader erzeugt
+  1 Document/Seite), nie über den eigentlichen
+  `SentenceSplitter`-Mechanismus mit 200-Token-Overlap. Das Protokoll
+  von **Ahornhöhe** wurde bewusst um 6 zusätzliche, realistische
+  Tagesordnungspunkte verlängert (Instandsetzung Tiefgaragenzufahrt,
+  Hausmeisterservice-Neuvergabe, Ladeinfrastruktur E-Autos, Wahl
+  Verwaltungsbeirat, Paketstation, Sonstiges) und auf einer einzelnen,
+  extra vergrößerten PDF-Seite gerendert (Seitenhöhe verdreifacht,
+  nur für Protokolle), damit der Text (~1140 Tokens) NICHT über
+  PDFReader auf Seite 2 umbricht, sondern in einem einzigen
+  PDFReader-Document bleibt. Dadurch musste der `SentenceSplitter`
+  selbst chunken.
+- **Verifiziert:** Das Dokument wird jetzt tatsächlich in 2 Chunks
+  aufgeteilt (Corpus-Chunkzahl 40 → 41), mit ~590 Zeichen echtem
+  Overlap zwischen den beiden Chunks (Gesamtlänge beider Chunks
+  5153 Zeichen vs. 4562 Zeichen Originaltext) — entspricht ungefähr
+  der erwarteten 200-Token-Vorgabe.
+- Testkatalog um 1 auf 13 Fragen erweitert (Testfall 13: Fakt aus dem
+  hinteren, nur per Overlap-Chunk erreichbaren Teil des verlängerten
+  Protokolls).
+- **Erneuter Richter-Kalibrierungsfall**: Testfall 13 schlug im ersten
+  Durchlauf fehl, weil die Test-Erwartung mehrdeutig formuliert war
+  ("Info liegt in der zweiten Hälfte des Dokuments" wurde vom Richter
+  fälschlich als Kritik an der Quellenangabe "Seite 1" gelesen, obwohl
+  das Dokument bewusst nur 1 Seite hat und "Seite 1" daher korrekt
+  ist). Nach Klarstellung der Erwartung (Korrektheitskriterium explizit
+  von Testdesign-Hintergrund getrennt): PASS.
+
+**Ergebnis: 13 von 13 Testfällen bestanden** (automatisiert per
+LLM-Richter bewertet).
+
+| # | Kategorie | Ergebnis |
+|---|---|---|
+| 1 | Widerspruch zwischen Quellen (Sonnenblick, Wohnfläche) | ✅ PASS |
+| 2 | Info nur in einem Dokument (Sonnenblick, Fahrstuhl) | ✅ PASS |
+| 3 | Einfacher Fakt (Gartenhof, Kaufpreis) | ✅ PASS |
+| 4 | Negativ-Fakt (Gartenhof, kein Fahrstuhl) | ✅ PASS |
+| 5 | Halluzinationstest (Ahornhöhe, Sauna) | ✅ PASS |
+| 6 | Cross-Objekt-Verwechslung (Gartenhof, Rücklage) | ✅ PASS |
+| 7 | Vergleich über 8 Objekte (Energieeffizienzklasse) | ✅ PASS |
+| 8 | Info nur in Teilungserklärung (Lindenpark, Garten-Sondernutzungsrecht) | ✅ PASS |
+| 9 | Widerspruch, unterschiedlich benannte Felder (Kastanienhof, Baujahr) | ✅ PASS |
+| 10 | Cross-Objekt-Verwechslung, ähnliche Neubauten (Birkenallee vs. Rosenhügel) | ✅ PASS |
+| 11 | Halluzinationstest (Seeblick, Concierge-Service) | ✅ PASS |
+| 12 | Mehrseitiges Dokument, seitenbasiertes Chunking (Lindenpark, Verwalter) | ✅ PASS |
+| 13 | **Neu:** Echtes Token-Chunking mit Overlap (Ahornhöhe, Verwaltungsbeirat) | ✅ PASS |
+
+### Alle Testfälle im Detail
+
+#### 1. Widerspruch zwischen Quellen (Sonnenblick, Wohnfläche)
+
+**Frage:** Wie groß ist die Wohnfläche der Wohnung Sonnenblick?
+
+**Erwartung:** Sollte beide Werte nennen (78 m² im Exposé, 76 m² im
+Energieausweis) und den Widerspruch explizit benennen, statt sich
+stillschweigend für einen Wert zu entscheiden.
+
+**Filter:** objekt_name = sonnenblick
+
+**Antwort:**
+> Die Wohnfläche der Wohnung "Sonnenblick" wird in zwei verschiedenen
+> Quellen unterschiedlich angegeben. Im Exposé wird die Wohnfläche mit
+> 78 m² angegeben, während im Energieausweis eine Wohnfläche von 76 m²
+> angegeben ist.
+>
+> - Exposé: 78 m²
+> - Energieausweis: 76 m²
+>
+> Diese unterschiedlichen Angaben stellen einen Widerspruch dar.
+
+**Quellen:** objekt1_sonnenblick_energieausweis.pdf, objekt1_sonnenblick_expose.pdf, objekt1_sonnenblick_protokoll.pdf, objekt1_sonnenblick_teilungserklaerung.pdf
+
+**Richter:** PASS — Die Antwort nennt beide Werte der Wohnfläche und
+benennt den Widerspruch zwischen den Quellen klar und deutlich.
+
+---
+
+#### 2. Information nur in einem Dokument (Sonnenblick, Fahrstuhl)
+
+**Frage:** Welche Firma wartet den Fahrstuhl im Haus Sonnenblick und
+wann war die letzte Prüfung?
+
+**Erwartung:** Sollte "Aufzugstechnik Reiner GmbH" und das Prüfdatum
+09.11.2023 nennen. Diese Info steht nur im Protokoll
+(objekt1_sonnenblick_protokoll.pdf) — wird anhand der Quellen-Liste
+geprüft, nicht anhand des Antworttexts.
+
+**Filter:** objekt_name = sonnenblick
+
+**Antwort:**
+> Die Firma, die den Fahrstuhl im Haus Sonnenblick wartet, ist die
+> "Aufzugstechnik Reiner GmbH". Die letzte Hauptprüfung durch den TÜV
+> Süd fand am 09.11.2023 statt. Diese Informationen stammen aus dem
+> Protokoll der ordentlichen Eigentümerversammlung.
+
+**Quellen:** objekt1_sonnenblick_energieausweis.pdf, objekt1_sonnenblick_expose.pdf, objekt1_sonnenblick_protokoll.pdf, objekt1_sonnenblick_teilungserklaerung.pdf
+
+**Richter:** PASS — Die Antwort nennt korrekt die Firma "Aufzugstechnik
+Reiner GmbH" und das Prüfdatum 09.11.2023, und verweist auf das
+Protokoll der Eigentümerversammlung.
+
+---
+
+#### 3. Einfacher Fakt (Gartenhof, Kaufpreis)
+
+**Frage:** Wie hoch ist der Kaufpreis der Wohnung Gartenhof?
+
+**Erwartung:** 229.000 EUR, Quelle objekt2_gartenhof_expose.pdf.
+
+**Filter:** objekt_name = gartenhof
+
+**Antwort:**
+> Der Kaufpreis der Wohnung "Gartenhof" beträgt 229.000 EUR. Diese
+> Information stammt aus dem Exposé (page_label: 1). Es gibt keine
+> abweichenden Angaben zu diesem Sachverhalt in den anderen
+> Dokumenten.
+
+**Quellen:** objekt2_gartenhof_energieausweis.pdf, objekt2_gartenhof_expose.pdf, objekt2_gartenhof_protokoll.pdf, objekt2_gartenhof_teilungserklaerung.pdf
+
+**Richter:** PASS — Die Antwort gibt den korrekten Kaufpreis der
+Wohnung "Gartenhof" an und verweist auf das entsprechende Dokument.
+
+---
+
+#### 4. Negativ-Fakt (Gartenhof, kein Fahrstuhl)
+
+**Frage:** Gibt es einen Fahrstuhl in der Wohnung Gartenhof?
+
+**Erwartung:** Nein — laut Exposé kein Fahrstuhl (Erdgeschoss, nicht
+erforderlich). Testet, ob explizit verneinte Fakten korrekt
+wiedergegeben werden.
+
+**Filter:** objekt_name = gartenhof
+
+**Antwort:**
+> In der Wohnung "Gartenhof" gibt es keinen Fahrstuhl, da dies im
+> Exposé ausdrücklich erwähnt wird: "Kein Fahrstuhl (nicht
+> erforderlich, da Erdgeschoss)." Es sind keine widersprüchlichen
+> Angaben zu diesem Sachverhalt in den anderen Dokumenten vorhanden.
+
+**Quellen:** objekt2_gartenhof_energieausweis.pdf, objekt2_gartenhof_expose.pdf, objekt2_gartenhof_protokoll.pdf, objekt2_gartenhof_teilungserklaerung.pdf
+
+**Richter:** PASS — Die Antwort gibt korrekt an, dass es keinen
+Fahrstuhl gibt, und verweist auf die entsprechende Information im
+Exposé.
+
+---
+
+#### 5. Halluzinationstest (Ahornhöhe, Sauna)
+
+**Frage:** Wann wurde die Sauna im Haus Ahornhöhe zuletzt gewartet?
+
+**Erwartung:** Es gibt keine Sauna in den Unterlagen. Sollte klar
+sagen, dass die Information nicht vorhanden ist, statt etwas zu
+erfinden.
+
+**Filter:** objekt_name = ahornhöhe
+
+**Antwort:**
+> Im Kontext sind keine Informationen über eine Sauna im Haus
+> Ahornhöhe enthalten. Daher kann ich keine Angaben zur letzten
+> Wartung einer Sauna machen.
+
+**Quellen:** objekt3_ahornhöhe_energieausweis.pdf, objekt3_ahornhöhe_expose.pdf, objekt3_ahornhöhe_protokoll.pdf, objekt3_ahornhöhe_teilungserklaerung.pdf
+
+**Richter:** PASS — Die Antwort stellt klar, dass keine Informationen
+über eine Sauna vorhanden sind.
+
+---
+
+#### 6. Cross-Objekt-Verwechslung (Gartenhof, Rücklage)
+
+**Frage:** Wurde bei der WEG Gartenhof eine Erhöhung der
+Instandhaltungsrücklage beschlossen?
+
+**Erwartung:** Diesen Beschluss gibt es nur bei Sonnenblick, nicht bei
+Gartenhof. Sollte nicht fälschlich vermischt werden — korrekte Antwort
+ist "nicht enthalten".
+
+**Filter:** objekt_name = gartenhof
+
+**Antwort:**
+> Im bereitgestellten Kontext sind keine Informationen über eine
+> Erhöhung der Instandhaltungsrücklage bei der WEG Gartenhof
+> enthalten. Daher kann ich diese Frage nicht beantworten.
+
+**Quellen:** objekt2_gartenhof_energieausweis.pdf, objekt2_gartenhof_expose.pdf, objekt2_gartenhof_protokoll.pdf, objekt2_gartenhof_teilungserklaerung.pdf
+
+**Richter:** PASS — Die Antwort stellt klar, dass keine Informationen
+über eine Erhöhung bei Gartenhof enthalten sind.
+
+---
+
+#### 7. Vergleich über 8 Objekte (Energieeffizienzklasse)
+
+**Frage:** Welches Objekt hat die beste Energieeffizienzklasse? Nenne
+alle Objekte mit ihrer jeweiligen Klasse.
+
+**Erwartung:** Seeblick (A+) ist am besten, vor Rosenhügel/Ahornhöhe
+(A), Birkenallee/Lindenpark (B), Gartenhof (C), Sonnenblick (D) und
+Kastanienhof (F). Testet, ob similarity_top_k=12 zuverlässig Kontext
+aus allen 8 Energieausweisen liefert.
+
+**Filter:** keiner (objektübergreifende Frage, ungefiltert)
+
+**Antwort:**
+> Das Objekt mit der besten Energieeffizienzklasse ist "Seeblick" mit
+> der Energieeffizienzklasse A+.
+>
+> 1. Kastanienhof: F
+> 2. Gartenhof: C
+> 3. Sonnenblick: D
+> 4. Lindenpark: B
+> 5. Birkenallee: B
+> 6. Ahornhöhe: A
+> 7. Rosenhügel: A
+> 8. Seeblick: A+
+
+**Quellen:** alle 8 Energieausweise plus vereinzelte weitere Dokumente
+(insgesamt 12 Chunks, top_k=12)
+
+**Richter:** PASS — Nennt korrekt das beste Objekt und listet alle 8
+Objekte mit ihrer jeweiligen Klasse auf.
+
+---
+
+#### 8. Information nur in der Teilungserklärung (Lindenpark, Garten)
+
+**Frage:** Wer hat laut den Unterlagen ein Sondernutzungsrecht am
+Garten bei der Wohnung Lindenpark?
+
+**Erwartung:** Der Eigentümer der Einheit Nr. 2 (Hochparterre) hat das
+exklusive Sondernutzungsrecht am Garten — diese Info steht nur in
+objekt4_lindenpark_teilungserklaerung.pdf.
+
+**Filter:** objekt_name = lindenpark
+
+**Antwort:**
+> Laut den Unterlagen hat der Eigentümer der Einheit Nr. 2
+> (Hochparterre) das ausschließliche Sondernutzungsrecht an der
+> Gartenfläche im Hinterhof. Dies ist in der Teilungserklärung gemäß
+> § 8 WEG festgelegt. Alle übrigen Einheiten haben kein Nutzungsrecht
+> an dieser Fläche.
+
+**Quellen:** objekt4_lindenpark_energieausweis.pdf, objekt4_lindenpark_expose.pdf, objekt4_lindenpark_protokoll.pdf, objekt4_lindenpark_teilungserklaerung.pdf
+
+**Richter:** PASS — Nennt korrekt Einheit Nr. 2 und verweist auf die
+Teilungserklärung.
+
+---
+
+#### 9. Widerspruch, unterschiedlich benannte Felder (Kastanienhof, Baujahr)
+
+**Frage:** In welchem Jahr wurde das Gebäude Kastanienhof gebaut?
+
+**Erwartung:** Leichte Abweichung: Exposé nennt Baujahr 1975,
+Energieausweis nennt Baujahr Gebäude 1974. Sollte beide Werte mit
+Quelle nennen. (Dies war ursprünglich ein bekannter Fehler — siehe
+Lauf vom 2026-08-05 20:40 — behoben durch QA_PROMPT-Fix im Lauf vom
+2026-08-06 01:43.)
+
+**Filter:** objekt_name = kastanienhof
+
+**Antwort:**
+> Das Gebäude Kastanienhof wurde im Jahr 1975 erbaut, laut den
+> Angaben im Exposé. Allerdings gibt es eine abweichende Angabe im
+> Energieausweis, der das Baujahr des Gebäudes mit 1974 angibt.
+> Somit gibt es einen Widerspruch zwischen den Quellen:
+> - Exposé: Baujahr 1975
+> - Energieausweis: Baujahr 1974
+
+**Quellen:** objekt6_kastanienhof_energieausweis.pdf, objekt6_kastanienhof_expose.pdf, objekt6_kastanienhof_protokoll.pdf, objekt6_kastanienhof_teilungserklaerung.pdf
+
+**Richter:** PASS — Nennt beide Quellen und weist korrekt auf den
+Widerspruch hin.
+
+---
+
+#### 10. Cross-Objekt-Verwechslung, ähnliche Neubauten (Birkenallee, PV-Anlage)
+
+**Frage:** Wurde bei der WEG Birkenallee eine Photovoltaikanlage
+beschlossen?
+
+**Erwartung:** Nein — diesen Beschluss gibt es nur bei Rosenhügel
+(einem ähnlichen Neubau). Bei Birkenallee nur als möglicher künftiger
+Tagesordnungspunkt erwähnt, kein Beschluss.
+
+**Filter:** objekt_name = birkenallee
+
+**Antwort:**
+> Bei der WEG Birkenallee wurde keine Photovoltaikanlage beschlossen.
+> In der Eigentümerversammlung am 08.06.2024 wurde lediglich
+> angeregt, das Thema für eine der nächsten Versammlungen als eigenen
+> Tagesordnungspunkt vorzubereiten, jedoch wurde kein konkreter
+> Beschluss gefasst.
+
+**Quellen:** objekt8_birkenallee_energieausweis.pdf, objekt8_birkenallee_expose.pdf, objekt8_birkenallee_protokoll.pdf, objekt8_birkenallee_teilungserklaerung.pdf
+
+**Richter:** PASS — Stellt klar, dass kein Beschluss gefasst wurde,
+keine Verwechslung mit Rosenhügel.
+
+---
+
+#### 11. Halluzinationstest (Seeblick, Concierge-Service)
+
+**Frage:** Gibt es einen Concierge-Service im Haus Seeblick?
+
+**Erwartung:** Es gibt keinen Concierge-Service in den Unterlagen.
+Sollte klar sagen, dass die Information nicht vorhanden ist.
+
+**Filter:** objekt_name = seeblick
+
+**Antwort:**
+> Die Informationen im Kontext enthalten keine Angaben zu einem
+> Concierge-Service im Haus "Seeblick". Daher kann ich nicht
+> bestätigen, ob ein solcher Service vorhanden ist oder nicht.
+
+**Quellen:** objekt5_seeblick_energieausweis.pdf, objekt5_seeblick_expose.pdf, objekt5_seeblick_protokoll.pdf, objekt5_seeblick_teilungserklaerung.pdf
+
+**Richter:** PASS — Stellt klar, dass keine Informationen vorhanden
+sind.
+
+---
+
+#### 12. Mehrseitiges Dokument, seitenbasiertes Chunking (Lindenpark, Verwalter)
+
+**Frage:** Welche Hausverwaltung ist laut Teilungserklärung als
+Verwalter der WEG Lindenpark bestellt?
+
+**Erwartung:** Hausverwaltung Baumann. Die Teilungserklärung umfasst
+2 PDF-Seiten (PDFReader-Aufteilung); der Verwalter-Abschnitt steht auf
+Seite 2. Testet, ob Retrieval den richtigen Teil eines mehrseitigen
+Dokuments findet.
+
+**Filter:** objekt_name = lindenpark
+
+**Antwort:**
+> Laut Teilungserklärung ist die Hausverwaltung Baumann als Verwalter
+> der Wohnungseigentümergemeinschaft (WEG) Lindenpark bestellt.
+
+**Quellen:** objekt4_lindenpark_energieausweis.pdf, objekt4_lindenpark_expose.pdf, objekt4_lindenpark_protokoll.pdf, objekt4_lindenpark_teilungserklaerung.pdf
+
+**Richter:** PASS — Nennt korrekt Hausverwaltung Baumann.
+
+---
+
+#### 13. Echtes Token-Chunking mit Overlap (Ahornhöhe, Verwaltungsbeirat) — NEU
+
+**Frage:** Wer wurde bei der WEG Ahornhöhe zum Vorsitzenden des
+Verwaltungsbeirats gewählt?
+
+**Erwartung:** "Herr T. Nowak" — einziges Korrektheitskriterium für
+den Antworttext. Testdesign-Hintergrund (kein Bewertungskriterium):
+Protokoll ist absichtlich eine einzelne, sehr lange PDF-Seite
+(>1024 Tokens), damit der `SentenceSplitter` selbst mit echtem
+200-Token-Overlap chunkt statt PDFReader seitenbasiert zu splitten.
+
+**Filter:** objekt_name = ahornhöhe
+
+**Antwort:**
+> Herr T. Nowak wurde zum Vorsitzenden des Verwaltungsbeirats gewählt.
+> Dies wird im Protokoll der ordentlichen Eigentümerversammlung
+> (Seite 1) erwähnt.
+
+**Quellen:** objekt3_ahornhöhe_energieausweis.pdf, objekt3_ahornhöhe_expose.pdf, objekt3_ahornhöhe_protokoll.pdf, objekt3_ahornhöhe_teilungserklaerung.pdf
+
+**Richter:** PASS — Nennt korrekt Herr T. Nowak und verweist auf das
+Protokoll.
 
 ---
 

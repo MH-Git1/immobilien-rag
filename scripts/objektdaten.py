@@ -493,6 +493,89 @@ OBJEKTE = [
                     "eingerichtet. Kostenrahmen bis 1.200 EUR genehmigt, "
                     "9 Ja-Stimmen, 2 Gegenstimmen.",
                 ),
+                (
+                    "Instandsetzung der Tiefgaragenzufahrt",
+                    "Die Einfahrtsrampe zur Tiefgarage weist seit dem "
+                    "letzten Winter Frostschäden am Belag auf. Ein "
+                    "Kostenvoranschlag der Firma Straßenbau Nord über "
+                    "9.800 EUR liegt vor. Nach Diskussion über mögliche "
+                    "Alternativangebote beschließt die Versammlung, das "
+                    "vorliegende Angebot anzunehmen, da die Rampe im "
+                    "Winter zunehmend rutschig und damit ein "
+                    "Sicherheitsrisiko darstellt. Die Arbeiten sollen im "
+                    "Spätsommer 2024 durchgeführt werden, um den Verkehr "
+                    "in der Tiefgarage möglichst wenig zu beeinträchtigen. "
+                    "Beschluss: Angenommen mit 10 Ja-Stimmen, 1 "
+                    "Gegenstimme.",
+                ),
+                (
+                    "Neuvergabe des Hausmeisterservice-Vertrags",
+                    "Der bisherige Vertrag mit dem Hausmeisterservice "
+                    "Reinlich GmbH läuft zum Jahresende aus. Die "
+                    "Verwaltung hat drei Vergleichsangebote eingeholt und "
+                    "stellt diese vor. Nach ausführlicher Diskussion über "
+                    "Leistungsumfang, Reaktionszeiten bei Notfällen und "
+                    "Preis einigt sich die Versammlung darauf, den "
+                    "bestehenden Vertrag mit angepassten Konditionen um "
+                    "zwei Jahre zu verlängern, da die bisherige "
+                    "Zusammenarbeit von den Eigentümern überwiegend "
+                    "positiv bewertet wird. Der monatliche Pauschalbetrag "
+                    "steigt dabei von 380 EUR auf 420 EUR. Beschluss: "
+                    "Verlängerung angenommen mit 9 Ja-Stimmen, 2 "
+                    "Enthaltungen.",
+                ),
+                (
+                    "Ladeinfrastruktur für Elektrofahrzeuge in der Tiefgarage",
+                    "Mehrere Eigentümer haben Interesse an der "
+                    "Installation von Wallboxen für ihre "
+                    "Tiefgaragenstellplätze bekundet. Die Verwaltung "
+                    "erläutert die rechtlichen Rahmenbedingungen nach dem "
+                    "novellierten WEG-Recht, wonach jeder Eigentümer "
+                    "grundsätzlich einen Anspruch auf Gestattung einer "
+                    "Lademöglichkeit hat. Diskutiert wird, ob eine "
+                    "gemeinschaftliche Lastmanagement-Lösung sinnvoller "
+                    "wäre als Einzellösungen, um die vorhandene "
+                    "Hausanschlussleistung nicht zu überlasten. Die "
+                    "Verwaltung wird beauftragt, ein Angebot für eine "
+                    "gemeinschaftliche Ladeinfrastruktur mit "
+                    "Lastmanagement einzuholen und der nächsten "
+                    "Versammlung vorzustellen.",
+                ),
+                (
+                    "Wahl eines neuen Verwaltungsbeirats",
+                    "Die Amtszeit des bisherigen Verwaltungsbeirats ist "
+                    "abgelaufen. Zur Wahl stellen sich Herr T. Nowak, "
+                    "Frau S. Achterberg und Herr M. Coban. Nach geheimer "
+                    "Abstimmung wird Herr T. Nowak mit 9 Ja-Stimmen zum "
+                    "neuen Vorsitzenden des Verwaltungsbeirats gewählt. "
+                    "Frau S. Achterberg wird mit 8 Ja-Stimmen als "
+                    "stellvertretende Vorsitzende gewählt. Der "
+                    "Verwaltungsbeirat unterstützt die Verwaltung "
+                    "künftig bei der Kontrolle der Jahresabrechnung und "
+                    "berät bei größeren Instandhaltungsmaßnahmen.",
+                ),
+                (
+                    "Anschaffung eines Paketstationssystems",
+                    "Aufgrund der gestiegenen Paketzustellungen wird die "
+                    "Anschaffung einer automatisierten Paketstation im "
+                    "Eingangsbereich vorgeschlagen. Die Verwaltung stellt "
+                    "ein Angebot über 6.400 EUR zuzüglich jährlicher "
+                    "Wartungskosten von 240 EUR vor. Einige Eigentümer "
+                    "äußern Bedenken hinsichtlich des benötigten "
+                    "Stellplatzes im ohnehin begrenzten Eingangsbereich. "
+                    "Die Versammlung beschließt, die Entscheidung zu "
+                    "vertagen und die Verwaltung zu bitten, alternative "
+                    "Standorte sowie ein zweites Angebot einzuholen.",
+                ),
+                (
+                    "Sonstiges",
+                    "Eine Eigentümerin regt an, künftig auch digitale "
+                    "Teilnahme an Eigentümerversammlungen per "
+                    "Videokonferenz zu ermöglichen. Die Verwaltung sagt "
+                    "zu, die technischen und rechtlichen Voraussetzungen "
+                    "bis zur nächsten Versammlung zu prüfen. Weitere "
+                    "Wortmeldungen gibt es nicht.",
+                ),
             ],
         },
         "teilungserklaerung": {

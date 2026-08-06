@@ -26,6 +26,19 @@ from objektdaten import OBJEKTE
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "data_pdf")
 
+# Protokolle nutzen eine höhere (nicht breitere) Seite als Standard-A4.
+# Grund: Bei Objekten mit vielen Tagesordnungspunkten (z.B. Ahornhöhe,
+# bewusst für den Chunking-Overlap-Test verlängert) soll der Text NICHT
+# automatisch auf eine 2. PDF-Seite umbrechen — sonst würde wie bei den
+# Teilungserklärungen wieder PDFReader (1 Document/Seite) die Aufteilung
+# übernehmen statt LlamaIndex' SentenceSplitter. Mit einer ausreichend
+# hohen Einzelseite bleibt der komplette Text in einem PDFReader-
+# Document, sodass der SentenceSplitter bei >1024 Tokens selbst mit
+# echtem Token-Overlap (200 Tokens) chunkt. Für die kürzeren Protokolle
+# der anderen Objekte ändert sich dadurch nichts (bleiben 1 Seite,
+# nur mit mehr Weißraum unten).
+PROTOKOLL_PAGESIZE = (A4[0], A4[1] * 3)
+
 # --- Styles, angelehnt an die echten Vorlagen (Kopfzeile mit
 # Gesetzesverweis, kleine Fußnoten, klare Sektionsüberschriften) ---
 _styles = getSampleStyleSheet()
@@ -64,10 +77,10 @@ def _feld_tabelle(zeilen):
     return tab
 
 
-def _dokument(dateiname, story):
+def _dokument(dateiname, story, pagesize=A4):
     pfad = os.path.join(OUTPUT_DIR, dateiname)
     doc = SimpleDocTemplate(
-        pfad, pagesize=A4,
+        pfad, pagesize=pagesize,
         topMargin=2 * cm, bottomMargin=2 * cm,
         leftMargin=2.2 * cm, rightMargin=2.2 * cm,
     )
@@ -230,7 +243,7 @@ def render_protokoll(objekt):
         ),
     ]
     dateiname = f'{objekt["id"]}_{objekt["name"].lower()}_protokoll.pdf'
-    return _dokument(dateiname, story)
+    return _dokument(dateiname, story, pagesize=PROTOKOLL_PAGESIZE)
 
 
 def render_teilungserklaerung(objekt):

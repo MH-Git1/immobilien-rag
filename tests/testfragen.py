@@ -206,6 +206,26 @@ TESTFRAGEN = [
             "findet, statt nur die erste Seite/den ganzen Chunk."
         ),
     },
+    {
+        "frage": (
+            "Wer wurde bei der WEG Ahornhöhe zum Vorsitzenden des "
+            "Verwaltungsbeirats gewählt?"
+        ),
+        "kategorie": "Echtes Chunking mit Token-Overlap (nicht seitenbasiert)",
+        "erwartung": (
+            "Antwort sollte 'Herr T. Nowak' nennen — das ist das einzige "
+            "Korrektheitskriterium für den Antworttext. (Hintergrund zum "
+            "Testdesign, KEIN Bewertungskriterium für die Antwort: Das "
+            "Protokoll ist absichtlich eine einzelne, sehr lange "
+            "PDF-Seite mit >1024 Tokens, damit der LlamaIndex-"
+            "SentenceSplitter selbst mit echtem 200-Token-Overlap chunkt "
+            "— verifiziert 2 Chunks, ~590 Zeichen Überschneidung. Die "
+            "gesuchte Information liegt inhaltlich im hinteren Teil des "
+            "Dokuments, technisch aber weiterhin auf Seite 1, da das "
+            "Dokument nur eine Seite hat — eine Quellenangabe 'Seite 1' "
+            "in der Antwort ist also korrekt, nicht falsch.)"
+        ),
+    },
 ]
 
 
