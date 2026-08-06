@@ -20,7 +20,7 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, UploadFile
 from fastapi.staticfiles import StaticFiles
 from llama_index.readers.file import PDFReader
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
@@ -81,6 +81,21 @@ app.add_middleware(BasicAuthMiddleware)
 
 class FrageRequest(BaseModel):
     frage: str
+
+    @field_validator("frage")
+    @classmethod
+    def frage_nicht_leer(cls, wert: str) -> str:
+        """
+        Leere/Whitespace-Fragen ohne diesen Check liefen bisher
+        ungebremst bis zum Embedding-/LLM-Call durch -- kostet echtes
+        Geld für eine sinnlose Anfrage und liefert bedeutungslose
+        Quellen mit Score 0.0 zurück. Das Frontend verhindert das zwar
+        clientseitig, aber ein direkter API-Call umging das bisher.
+        """
+        wert = wert.strip()
+        if not wert:
+            raise ValueError("Frage darf nicht leer sein.")
+        return wert
 
 
 class Quelle(BaseModel):
@@ -162,7 +177,8 @@ def _slug(text: str) -> str:
 
 class UploadErgebnis(BaseModel):
     dateiname: str
-    seiten: int
+    seiten: int = 0
+    fehler: str | None = None
 
 
 class UploadResponse(BaseModel):
@@ -183,10 +199,20 @@ async def dokumente_hochladen(
     objekt_name-Metadatenfeld verwendet, damit ein späterer kompletter
     Neuaufbau (SimpleDirectoryReader + _objekt_metadata in main.py) den
     gleichen Objektnamen wieder erkennt.
+
+    Eine defekte/keine-echte-PDF-Datei bricht nicht den ganzen Batch ab
+    (500 Internal Server Error): PDFReader wirft dafür einen
+    unabgefangenen Fehler, der vorher den gesamten Request zum Absturz
+    brachte, auch wenn andere Dateien im selben Batch gültig waren.
+    Stattdessen wird die fehlerhafte Datei einzeln als Fehler im
+    Ergebnis markiert (fehler-Feld), die übrigen Dateien werden normal
+    verarbeitet, und die bereits geschriebene Datei wird wieder
+    gelöscht statt als Datenmüll liegen zu bleiben.
     """
     objekt_slug = _slug(objekt_name)
     pdf_reader = PDFReader()
     ergebnisse = []
+    mindestens_eine_erfolgreich = False
 
     for datei in dateien:
         original_name = Path(datei.filename or "dokument.pdf").stem
@@ -198,7 +224,18 @@ async def dokumente_hochladen(
         inhalt = await datei.read()
         zielpfad.write_bytes(inhalt)
 
-        seiten = pdf_reader.load_data(zielpfad)
+        try:
+            seiten = pdf_reader.load_data(zielpfad)
+        except Exception:
+            zielpfad.unlink(missing_ok=True)
+            ergebnisse.append(
+                UploadErgebnis(
+                    dateiname=datei.filename or "unbekannt",
+                    fehler="Datei konnte nicht als PDF gelesen werden (beschädigt oder kein gültiges PDF).",
+                )
+            )
+            continue
+
         for seite in seiten:
             seite.metadata["objekt_name"] = objekt_slug
             seite.metadata["file_name"] = zielpfad.name
@@ -208,8 +245,9 @@ async def dokumente_hochladen(
         extraktion.extrahiere_und_speichere(objekt_slug, zielpfad.name, voller_text)
 
         ergebnisse.append(UploadErgebnis(dateiname=zielpfad.name, seiten=len(seiten)))
+        mindestens_eine_erfolgreich = True
 
-    if objekt_slug not in zustand["bekannte_objekte"]:
+    if mindestens_eine_erfolgreich and objekt_slug not in zustand["bekannte_objekte"]:
         zustand["bekannte_objekte"].append(objekt_slug)
 
     return UploadResponse(objekt=objekt_slug, hochgeladen=ergebnisse)

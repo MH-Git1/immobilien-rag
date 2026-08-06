@@ -141,6 +141,21 @@ _SPALTEN = [
     "etage",
 ]
 
+# NUMERIC-Spalten kommen von psycopg2 als decimal.Decimal zurück und
+# werden von FastAPI dadurch als String statt als Zahl serialisiert
+# (z.B. "112.0" statt 112.0) -- im Frontend sah man dadurch hässliche
+# Werte wie "112.0 m²" statt "112 m²". Explizite float()-Konvertierung
+# hier behebt das an der Quelle, ohne das Frontend anzufassen.
+_NUMERISCHE_FELDER = {"kaufpreis_eur", "wohnflaeche_qm", "zimmer", "hausgeld_eur_monatlich"}
+
+
+def _zeile_aufbereiten(row: tuple) -> dict:
+    eintrag = dict(zip(_SPALTEN, row))
+    for feld in _NUMERISCHE_FELDER:
+        if eintrag[feld] is not None:
+            eintrag[feld] = float(eintrag[feld])
+    return eintrag
+
 
 def kennzahlen_fuer_objekt(objekt_name: str) -> list[dict]:
     conn = psycopg2.connect(**verbindungsparameter())
@@ -151,7 +166,7 @@ def kennzahlen_fuer_objekt(objekt_name: str) -> list[dict]:
                 "WHERE objekt_name = %s ORDER BY dateiname",
                 (objekt_name,),
             )
-            return [dict(zip(_SPALTEN, row)) for row in cur.fetchall()]
+            return [_zeile_aufbereiten(row) for row in cur.fetchall()]
     finally:
         conn.close()
 
@@ -164,6 +179,6 @@ def alle_kennzahlen() -> list[dict]:
                 f"SELECT {', '.join(_SPALTEN)} FROM {TABELLE} "
                 "ORDER BY objekt_name, dateiname"
             )
-            return [dict(zip(_SPALTEN, row)) for row in cur.fetchall()]
+            return [_zeile_aufbereiten(row) for row in cur.fetchall()]
     finally:
         conn.close()

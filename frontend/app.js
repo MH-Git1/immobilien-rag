@@ -220,10 +220,22 @@ uploadButton.addEventListener("click", async () => {
     if (!response.ok) {
       throw new Error(`Server-Fehler (${response.status})`);
     }
-    await response.json();
-    ausgewaehlteDateien.forEach((e) => {
-      e.status = "erledigt";
-      e.statusKlasse = "erledigt";
+    const daten = await response.json();
+    // Pro Datei einzeln auswerten statt pauschal "erledigt": der Server
+    // meldet einzelne fehlerhafte Dateien (z.B. beschädigtes PDF) jetzt
+    // mit HTTP 200 und einem fehler-Feld je Datei, statt den ganzen
+    // Batch mit 500 abzubrechen. Reihenfolge entspricht der Upload-
+    // Reihenfolge.
+    daten.hochgeladen.forEach((ergebnis, index) => {
+      const eintrag = ausgewaehlteDateien[index];
+      if (!eintrag) return;
+      if (ergebnis.fehler) {
+        eintrag.status = ergebnis.fehler;
+        eintrag.statusKlasse = "fehler";
+      } else {
+        eintrag.status = "erledigt";
+        eintrag.statusKlasse = "erledigt";
+      }
     });
     await bekannteObjekteLaden();
     await objekteUebersichtLaden();
