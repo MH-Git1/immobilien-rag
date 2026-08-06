@@ -5,7 +5,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py api.py ./
+# *.py statt einer festen Dateiliste: neue Root-Module (wie zuletzt
+# db.py/protokoll.py/extraktion.py) landen automatisch im Image, ohne
+# dass hier jedes Mal eine Zeile ergänzt werden muss -- das genau war
+# der Bug, der den Produktions-Deploy stillschweigend zum Absturz
+# gebracht hat (ModuleNotFoundError: extraktion), siehe Testlauf-Doku.
+COPY *.py ./
 COPY frontend/ frontend/
 COPY data_pdf/ data_pdf/
 
