@@ -26,6 +26,7 @@ from llama_index.core import (
     Settings,
     PromptTemplate,
 )
+from llama_index.core.vector_stores import MetadataFilter, MetadataFilters
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.postgres import PGVectorStore
@@ -88,6 +89,23 @@ QA_PROMPT = PromptTemplate(
 )
 
 
+def _objekt_metadata(datei_pfad: str) -> dict:
+    """
+    file_metadata-Callback für SimpleDirectoryReader: extrahiert den
+    Objektnamen aus dem Dateinamen (z.B. "gartenhof" aus
+    "objekt2_gartenhof_expose.pdf") und legt ihn als eigenes
+    Metadatenfeld "objekt_name" ab. Damit lässt sich Retrieval bei
+    Fragen zu einem konkreten Objekt gezielt filtern (siehe
+    _erkenne_objekt / beantworte_frage) statt über den ganzen Corpus zu
+    suchen — vermeidet semantisches Rauschen zwischen sehr ähnlich
+    aufgebauten Objekten (siehe Regression in docs/testergebnisse.md).
+    """
+    dateiname = os.path.basename(datei_pfad)
+    teile = dateiname.split("_")
+    objekt_name = teile[1] if len(teile) > 1 else "unbekannt"
+    return {"objekt_name": objekt_name}
+
+
 def _pg_verbindungsparameter() -> dict:
     """Liest die Postgres-Zugangsdaten aus den Umgebungsvariablen (.env)."""
     return {
@@ -143,6 +161,72 @@ def _anzahl_vorhandener_chunks() -> int:
         conn.close()
 
 
+def _bekannte_objektnamen() -> list[str]:
+    """
+    Liest die Menge aller vorkommenden objekt_name-Werte direkt per SQL
+    aus Postgres — dynamisch statt hart codiert, damit neue/entfernte
+    Objekte in data_pdf/ nicht manuell nachgepflegt werden müssen.
+    """
+    tabelle = f"data_{PG_TABLE_NAME}"
+    conn = psycopg2.connect(**_pg_verbindungsparameter())
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f'SELECT DISTINCT metadata_->>\'objekt_name\' FROM "{tabelle}"'
+            )
+            return [row[0] for row in cur.fetchall() if row[0]]
+    finally:
+        conn.close()
+
+
+def _erkenne_objekt(frage: str, bekannte_objekte: list[str]) -> str | None:
+    """
+    Prüft, ob die Frage genau einen bekannten Objektnamen enthält (z.B.
+    "gartenhof" in "Gibt es einen Fahrstuhl in der Wohnung Gartenhof?").
+    Bei genau einem Treffer wird dieser für eine gezielte
+    Metadaten-Filterung zurückgegeben. Bei keinem Treffer (allgemeine
+    Frage) oder mehreren Treffern (z.B. Vergleichsfragen über mehrere
+    Objekte) wird None zurückgegeben — dann sucht beantworte_frage()
+    ungefiltert über den ganzen Corpus, wie bisher.
+    """
+    frage_klein = frage.lower()
+    treffer = [name for name in bekannte_objekte if name in frage_klein]
+    return treffer[0] if len(treffer) == 1 else None
+
+
+def beantworte_frage(index: VectorStoreIndex, frage: str, bekannte_objekte: list[str]):
+    """
+    Zentrale Anfrage-Funktion, genutzt von interaktive_schleife() und vom
+    Testkatalog (tests/testfragen.py) — stellt sicher, dass beide
+    denselben Filterungs- und Prompt-Mechanismus verwenden.
+
+    Wird genau ein Objektname in der Frage erkannt, filtert die
+    Vektorsuche gezielt auf dessen Dokumente (objekt_name-Metadatenfeld),
+    statt über alle 8 Objekte hinweg zu suchen. Das reduziert semantisches
+    Rauschen zwischen den strukturell sehr ähnlichen Objektunterlagen
+    (siehe Regression in docs/testergebnisse.md). Bei Fragen ohne
+    erkennbaren einzelnen Objektnamen (z.B. "Welches Objekt hat die beste
+    Energieeffizienzklasse?") bleibt die Suche ungefiltert über den
+    gesamten Corpus, damit objektübergreifende Vergleiche weiter
+    funktionieren.
+    """
+    objekt = _erkenne_objekt(frage, bekannte_objekte)
+    filters = None
+    if objekt is not None:
+        filters = MetadataFilters(
+            filters=[MetadataFilter(key="objekt_name", value=objekt)]
+        )
+
+    query_engine = index.as_query_engine(
+        similarity_top_k=SIMILARITY_TOP_K, filters=filters
+    )
+    query_engine.update_prompts(
+        {"response_synthesizer:text_qa_template": QA_PROMPT}
+    )
+    antwort = query_engine.query(frage)
+    return antwort, objekt
+
+
 def baue_index() -> VectorStoreIndex:
     """
     Liefert den Vektor-Index — entweder aus Postgres geladen oder neu
@@ -178,7 +262,9 @@ def baue_index() -> VectorStoreIndex:
         print(f"Lade bestehenden Index aus Postgres ({anzahl} Chunks) ...")
         return VectorStoreIndex.from_vector_store(vector_store)
 
-    dokumente = SimpleDirectoryReader(DATA_DIR).load_data()
+    dokumente = SimpleDirectoryReader(
+        DATA_DIR, file_metadata=_objekt_metadata
+    ).load_data()
     print(f"{len(dokumente)} Dokument(e) aus '{DATA_DIR}/' eingelesen.")
 
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
@@ -193,24 +279,25 @@ def interaktive_schleife(index: VectorStoreIndex) -> None:
     """
     Erlaubt es, wiederholt Fragen an den Index zu stellen.
 
-    query_engine.query() läuft in zwei Schritten ab:
+    beantworte_frage() (siehe oben) läuft dabei in zwei Schritten ab:
     1. Retrieval: Die Frage wird ebenfalls in einen Vektor umgewandelt
        (Embedding). Per Kosinus-Ähnlichkeit werden die "similarity_top_k"
-       ähnlichsten Chunks per pgvector aus Postgres geholt. LlamaIndex-
-       Standard wäre 2; wir setzen SIMILARITY_TOP_K=6 (siehe oben), weil
+       ähnlichsten Chunks per pgvector aus Postgres geholt — LlamaIndex-
+       Standard wäre 2; wir setzen SIMILARITY_TOP_K=12 (siehe oben), weil
        2 Chunks für objektübergreifende Vergleichsfragen nicht reichen.
+       Wird in der Frage genau ein Objektname erkannt, wird die Suche
+       zusätzlich per Metadaten-Filter auf dessen Dokumente eingegrenzt.
     2. Generation: Die gefundenen Chunks werden zusammen mit der Frage
        als Kontext an das LLM (hier: gpt-4o-mini, siehe Settings.llm)
        geschickt, das daraus die Antwort formuliert.
 
     Die Quellenangabe kommt aus response.source_nodes: Jeder verwendete
     Chunk (Node) trägt die Metadaten seines Ursprungs-Dokuments (u.a.
-    file_name) mit sich, weil SimpleDirectoryReader diese beim Einlesen
-    an jedes Document angehängt hat und sie beim Chunking an die
-    Nodes vererbt werden.
+    file_name, objekt_name) mit sich, weil SimpleDirectoryReader diese
+    beim Einlesen an jedes Document angehängt hat und sie beim Chunking
+    an die Nodes vererbt werden.
     """
-    query_engine = index.as_query_engine(similarity_top_k=SIMILARITY_TOP_K)
-    query_engine.update_prompts({"response_synthesizer:text_qa_template": QA_PROMPT})
+    bekannte_objekte = _bekannte_objektnamen()
 
     print("\nObjektunterlagen-Assistent bereit. Stelle deine Fragen.")
     print("Zum Beenden 'exit' oder 'quit' eingeben.\n")
@@ -223,8 +310,10 @@ def interaktive_schleife(index: VectorStoreIndex) -> None:
             print("Auf Wiedersehen.")
             break
 
-        antwort = query_engine.query(frage)
+        antwort, objekt = beantworte_frage(index, frage, bekannte_objekte)
 
+        if objekt:
+            print(f"\n[Retrieval gefiltert auf Objekt: {objekt}]")
         print(f"\nAntwort: {antwort}\n")
         print("Quellen:")
         for node in antwort.source_nodes:

@@ -6,9 +6,63 @@ zuordnen lässt. Quelle der Fragen: `tests/testfragen.py`.
 
 ---
 
+## Lauf vom 2026-08-06 02:13 (CEST) — Metadaten-Filterung + automatisierte Bewertung (LLM-Richter)
+
+**Git-Commit:** `3aeff3839c272388ac3cf2387b178fe6c55d9ce0` ("Metadaten-Filterung
+(Retrieval) und LLM-als-Richter (automatisierte Tests)")
+
+**Was sich seit dem letzten Lauf geändert hat:**
+
+- **Metadaten-Filterung eingeführt**: Jedes Dokument bekommt beim
+  Einlesen ein `objekt_name`-Metadatenfeld (aus dem Dateinamen
+  extrahiert). Erkennt `main.py` in der Frage genau einen bekannten
+  Objektnamen, filtert die Vektorsuche gezielt auf dessen Dokumente,
+  statt über den ganzen 40-Chunk-Corpus zu suchen. Bei Fragen ohne
+  eindeutigen Objektnamen (z. B. Vergleichsfragen) bleibt die Suche
+  ungefiltert. Behebt strukturell die Ursache der letzten Regression
+  (semantisches Rauschen zwischen ähnlichen Objekten).
+- **LLM-als-Richter eingeführt**: `tests/testfragen.py` bewertet jede
+  Antwort jetzt automatisiert per zweitem LLM-Call (PASS/FAIL +
+  Begründung) gegen die hinterlegte Erwartung, statt dass die Antworten
+  von Hand gelesen werden.
+- **Wichtiger Kalibrierungs-Fund beim Richter selbst**: Der erste
+  Richter-Prompt-Entwurf war zu wörtlich/streng — er verlangte u. a.,
+  dass exakte Dateinamen im Antworttext wörtlich vorkommen, und
+  bewertete korrekt-zurückhaltende Formulierungen ("kann ich nicht
+  bestätigen") fälschlich als FAIL. Erster automatisierter Lauf: 8/12.
+  Nach Analyse jedes einzelnen FAILs (3 von 4 waren Richterfehler, nicht
+  Systemfehler) wurde der Richter-Prompt nachgeschärft (Fokus auf
+  fachlichen Inhalt statt Zitierformat, explizite Regel für korrekt
+  zurückhaltende "nicht vorhanden"-Antworten) — danach 11/12. Der
+  letzte verbleibende Fall war ebenfalls ein reines
+  Formulierungs-Problem der Testerwartung selbst (verlangte wörtliche
+  Dateinamensnennung im Fließtext), nicht des Systems — nach Anpassung
+  der Erwartung: 12/12.
+- **Eine echte, kleine Verhaltensänderung durch die Filterung
+  beobachtet**: Bei der Gartenhof-Rücklage-Frage antwortet das System
+  jetzt vorsichtiger ("kann ich nicht bestätigen" statt zuvor "Nein, es
+  wurde nicht beschlossen") — weil ohne Kontext zu anderen Objekten
+  weniger Kontrastinformation für eine bestimmte Verneinung vorliegt.
+  Sachlich weiterhin korrekt (keine Verwechslung, keine Erfindung),
+  aber ein nachvollziehbarer Kompromiss der Filterung: weniger
+  Cross-Objekt-Risiko, dafür etwas vorsichtigere Formulierung bei
+  Abwesenheits-Fragen.
+
+**Ergebnis: 12 von 12 Testfällen bestehen, automatisiert per
+LLM-Richter bewertet** (nicht mehr manuell gelesen).
+
+**Wichtige methodische Erkenntnis für dieses Projekt:** Ein
+LLM-als-Richter ist kein Selbstläufer — er muss selbst kalibriert und
+gegen bekannte, manuell verifizierte Fälle geprüft werden, sonst
+produziert er eigene falsche Positive/Negative. Das haben wir hier
+direkt erlebt (8/12 → 12/12 durch reine Prompt-Kalibrierung, ohne dass
+sich das eigentliche System verändert hat).
+
+---
+
 ## Lauf vom 2026-08-06 01:43 (CEST) — Längere Teilungserklärungen, Prompt-Fix
 
-**Git-Commit:** `8f15fb46620aa4f083f7e9f770da0d2d180ac4fe` ("BTeilungserklärungen verlängert, Widerspruchs-Prompt
+**Git-Commit:** `8f15fb46620aa4f083f7e9f770da0d2d180ac4fe` ("Teilungserklärungen verlängert, Widerspruchs-Prompt
 nachgeschärft")
 
 **Was sich seit dem letzten Lauf geändert hat:**

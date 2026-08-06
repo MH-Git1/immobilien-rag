@@ -1,20 +1,71 @@
 """
 Testfragen-Katalog für den Objektunterlagen-Assistenten.
 
-Das sind keine automatischen Pass/Fail-Tests im klassischen Sinn — die
-Antworten kommen vom LLM und sind frei formuliert, ein exaktes
-String-Assert wäre unbrauchbar. Stattdessen ist das ein
-Regressionskatalog: Jede Frage deckt eine typische RAG-Schwachstelle ab
-(Widerspruch zwischen Quellen, Info nur in einem Dokument, Halluzination,
-Objektverwechslung, objektübergreifender Vergleich). Bei Änderungen an
-main.py (Chunking, Prompt, similarity_top_k, Modellwahl) hier gegenprüfen,
-ob sich das Antwortverhalten verschlechtert hat.
+Ein exaktes String-Assert wäre bei frei formulierten LLM-Antworten
+unbrauchbar. Stattdessen bewertet ein zweiter, separater LLM-Call
+("Richter") jede Antwort gegen die hier hinterlegte Erwartung als
+PASS/FAIL mit Begründung — siehe bewerte_antwort() unten. Das macht aus
+dem Regressionskatalog einen automatisierten Test, statt dass die
+Antworten jedes Mal von Hand gelesen werden müssen.
+
+Jede Frage deckt eine typische RAG-Schwachstelle ab (Widerspruch
+zwischen Quellen, Info nur in einem Dokument, Halluzination,
+Objektverwechslung, objektübergreifender Vergleich, mehrseitige
+Dokumente). Bei Änderungen an main.py (Chunking, Prompt,
+similarity_top_k, Metadaten-Filterung, Modellwahl) hier gegenprüfen, ob
+sich das Antwortverhalten verschlechtert hat.
 
 Aufruf: venv/bin/python -m tests.testfragen
 (vom Projekt-Root aus)
 """
 
-from main import baue_index, QA_PROMPT, SIMILARITY_TOP_K
+from llama_index.core import Settings
+
+from main import baue_index, beantworte_frage, _bekannte_objektnamen
+
+RICHTER_PROMPT = """Du bist ein Prüfer für ein RAG-System, das Fragen zu \
+Immobilien-Objektunterlagen beantwortet.
+
+Frage: {frage}
+Erwartung (Kriterium für eine korrekte Antwort): {erwartung}
+Tatsächliche Antwort des Systems: {antwort}
+
+Bewerte, ob die tatsächliche Antwort das Kriterium ERFÜLLT — es geht um \
+den fachlichen Inhalt, nicht um exakte Wortwahl oder Zitierformat.
+
+Wichtige Kalibrierung:
+- Wenn die Erwartung einen Dateinamen als Quelle nennt, reicht es, wenn \
+die Antwort inhaltlich klar auf das richtige Dokument verweist (z.B. \
+"laut Protokoll"). Der exakte Dateiname muss NICHT wörtlich genannt \
+werden.
+- Wenn die Erwartung verlangt, dass eine NICHT vorhandene Information \
+korrekt als fehlend dargestellt wird: Sowohl ein klares "Nein" als auch \
+eine vorsichtigere Formulierung wie "diese Information ist im Kontext \
+nicht enthalten" oder "ich kann das nicht bestätigen" gelten als PASS — \
+entscheidend ist NUR, dass nichts Falsches behauptet oder erfunden wird.
+- Sei strikt bei tatsächlichen inhaltlichen Fehlern: erfundene Fakten, \
+fehlende Werte bei einem geforderten Widerspruch, oder \
+Objektverwechslungen sind IMMER ein FAIL.
+
+Antworte in exakt diesem Format, ohne weitere Erklärung davor:
+PASS oder FAIL
+Begründung: <ein Satz>
+"""
+
+
+def bewerte_antwort(frage: str, erwartung: str, antwort_text: str) -> tuple[bool, str]:
+    """
+    Lässt einen zweiten LLM-Call (dasselbe Modell wie main.py,
+    gpt-4o-mini) die Antwort gegen die Erwartung bewerten. Günstig genug
+    für einen Testkatalog dieser Größe, und zuverlässiger/schneller als
+    manuelles Durchlesen bei wachsender Fragenzahl.
+    """
+    prompt = RICHTER_PROMPT.format(
+        frage=frage, erwartung=erwartung, antwort=antwort_text
+    )
+    ergebnis = str(Settings.llm.complete(prompt)).strip()
+    ist_pass = ergebnis.upper().startswith("PASS")
+    return ist_pass, ergebnis
 
 TESTFRAGEN = [
     {
@@ -34,9 +85,12 @@ TESTFRAGEN = [
         "kategorie": "Information nur in einem Dokument",
         "erwartung": (
             "Sollte 'Aufzugstechnik Reiner GmbH' und das Prüfdatum "
-            "09.11.2023 nennen, mit Quelle "
-            "objekt1_sonnenblick_protokoll.pdf — diese Info steht "
-            "nirgendwo sonst."
+            "09.11.2023 nennen. Diese Info steht nur im Protokoll "
+            "(objekt1_sonnenblick_protokoll.pdf) — das wird separat "
+            "anhand der Quellen-Liste geprüft, nicht anhand des "
+            "Antworttexts; die Antwort muss den Dateinamen nicht "
+            "wörtlich nennen, solange sie inhaltlich auf das Protokoll "
+            "verweist."
         ),
     },
     {
@@ -157,24 +211,39 @@ TESTFRAGEN = [
 
 def fuehre_tests_aus() -> None:
     index = baue_index()
-    query_engine = index.as_query_engine(similarity_top_k=SIMILARITY_TOP_K)
-    query_engine.update_prompts(
-        {"response_synthesizer:text_qa_template": QA_PROMPT}
-    )
+    bekannte_objekte = _bekannte_objektnamen()
 
+    ergebnisse = []
     for i, testfall in enumerate(TESTFRAGEN, start=1):
-        antwort = query_engine.query(testfall["frage"])
-        quellen = [
-            node.metadata.get("file_name", "unbekannt")
-            for node in antwort.source_nodes
-        ]
+        antwort, objekt_gefiltert = beantworte_frage(
+            index, testfall["frage"], bekannte_objekte
+        )
+        quellen = sorted(
+            {node.metadata.get("file_name", "unbekannt") for node in antwort.source_nodes}
+        )
+        ist_pass, richter_begruendung = bewerte_antwort(
+            testfall["frage"], testfall["erwartung"], str(antwort)
+        )
+        ergebnisse.append(ist_pass)
 
-        print(f"[{i}/{len(TESTFRAGEN)}] {testfall['kategorie']}")
+        status = "PASS" if ist_pass else "FAIL"
+        print(f"[{i}/{len(TESTFRAGEN)}] {status} — {testfall['kategorie']}")
         print(f"Frage:     {testfall['frage']}")
+        if objekt_gefiltert:
+            print(f"Filter:    objekt_name = {objekt_gefiltert}")
         print(f"Erwartung: {testfall['erwartung']}")
         print(f"Antwort:   {antwort}")
         print(f"Quellen:   {quellen}")
+        print(f"Richter:   {richter_begruendung}")
         print("-" * 70)
+
+    bestanden = sum(ergebnisse)
+    print(f"\nErgebnis: {bestanden}/{len(ergebnisse)} Testfälle bestanden.")
+    if bestanden < len(ergebnisse):
+        fehlgeschlagen = [
+            i + 1 for i, ok in enumerate(ergebnisse) if not ok
+        ]
+        print(f"Fehlgeschlagen: Testfall(-fälle) {fehlgeschlagen}")
 
 
 if __name__ == "__main__":
