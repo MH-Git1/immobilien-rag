@@ -57,6 +57,7 @@ async function frageSenden(frage) {
         )
         .join("")}</div>`;
     }
+    inhalt += `<button class="kopieren-button" data-antwort="${escapeHtml(daten.antwort)}">Kopieren</button>`;
     ladeBlase.innerHTML = inhalt;
   } catch (fehler) {
     ladeBlase.innerHTML = `<div class="blase">Entschuldigung, es ist ein Fehler aufgetreten: ${escapeHtml(fehler.message)}</div>`;
@@ -79,6 +80,25 @@ document.querySelectorAll(".beispiel-chip").forEach((chip) => {
   chip.addEventListener("click", () => {
     frageSenden(chip.textContent);
   });
+});
+
+// Event-Delegation statt Listener pro Nachricht, da Antwort-Elemente
+// erst zur Laufzeit über innerHTML entstehen.
+verlauf.addEventListener("click", async (ereignis) => {
+  const button = ereignis.target.closest(".kopieren-button");
+  if (!button) return;
+
+  try {
+    await navigator.clipboard.writeText(button.dataset.antwort);
+    button.textContent = "Kopiert ✓";
+    button.disabled = true;
+    setTimeout(() => {
+      button.textContent = "Kopieren";
+      button.disabled = false;
+    }, 1500);
+  } catch (fehler) {
+    button.textContent = "Kopieren fehlgeschlagen";
+  }
 });
 
 // --- Tabs ---

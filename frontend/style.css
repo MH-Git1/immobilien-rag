@@ -205,6 +205,22 @@ body {
   padding: 4px 10px;
 }
 
+.kopieren-button {
+  align-self: flex-start;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-schwach);
+  background: transparent;
+  border: none;
+  padding: 6px 2px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.kopieren-button:hover { color: var(--akzent); }
+.kopieren-button:disabled { cursor: default; color: var(--akzent); }
+
 .ladeanzeige {
   display: flex;
   gap: 4px;
