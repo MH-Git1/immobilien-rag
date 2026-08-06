@@ -1,5 +1,7 @@
 # Immobilien-RAG-Projekt (Objektunterlagen-Assistent)
 
+[![Testkatalog](https://github.com/MH-Git1/immobilien-rag/actions/workflows/tests.yml/badge.svg)](https://github.com/MH-Git1/immobilien-rag/actions/workflows/tests.yml)
+
 Ein RAG-System (Retrieval Augmented Generation), das Fragen zu
 Immobilien-Objektunterlagen (Exposés, Energieausweise,
 Eigentümerversammlungs-Protokolle, Teilungserklärungen) beantwortet —
