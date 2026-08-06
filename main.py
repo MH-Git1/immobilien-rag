@@ -34,6 +34,7 @@ from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.postgres import PGVectorStore
 
+import extraktion
 import protokoll
 from db import verbindungsparameter as _pg_verbindungsparameter
 
@@ -301,6 +302,7 @@ def baue_index() -> VectorStoreIndex:
           sondern über den PGVectorStore direkt in Postgres geschrieben.
     """
     protokoll.sicherstelle_tabelle()
+    extraktion.sicherstelle_tabelle()
     vector_store = _baue_pgvector_store()
 
     anzahl = _anzahl_vorhandener_chunks()
@@ -318,7 +320,34 @@ def baue_index() -> VectorStoreIndex:
         dokumente, storage_context=storage_context
     )
     print("Index in Postgres (pgvector) gespeichert.")
+
+    _extrahiere_kennzahlen_je_datei(dokumente)
+
     return index
+
+
+def _extrahiere_kennzahlen_je_datei(dokumente: list) -> None:
+    """
+    Strukturierte Kennzahlen (Kaufpreis, Wohnfläche, ...) laufen pro
+    Datei, nicht pro Document/Seite: PDFReader erzeugt ein Document je
+    PDF-Seite (siehe baue_index-Docstring), und mehrseitige Dokumente
+    (z.B. Teilungserklärung) sollen als ein zusammenhängender Text
+    extrahiert werden statt Seite für Seite mit sich gegenseitig
+    überschreibenden Ergebnissen (siehe extraktion.py: dateiname ist
+    eindeutiger Schlüssel je Datensatz).
+    """
+    texte_je_datei: dict[str, list[str]] = {}
+    objekt_je_datei: dict[str, str] = {}
+    for doc in dokumente:
+        dateiname = doc.metadata.get("file_name", "unbekannt")
+        texte_je_datei.setdefault(dateiname, []).append(doc.text)
+        objekt_je_datei[dateiname] = doc.metadata.get("objekt_name", "unbekannt")
+
+    print(f"Extrahiere Kennzahlen aus {len(texte_je_datei)} Datei(en) ...")
+    for dateiname, texte in texte_je_datei.items():
+        extraktion.extrahiere_und_speichere(
+            objekt_je_datei[dateiname], dateiname, "\n".join(texte)
+        )
 
 
 def interaktive_schleife(index: VectorStoreIndex) -> None:

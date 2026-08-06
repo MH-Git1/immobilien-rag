@@ -103,6 +103,22 @@ FROM anfrage_protokoll
 GROUP BY herkunft;
 ```
 
+## Strukturierte Kennzahlen-Extraktion
+
+Neben der freitext-basierten RAG-Suche werden beim Einlesen jedes
+Dokuments (Ersteinlesen wie auch Upload) zusätzlich klassisch
+durchsuchbare Kennzahlen extrahiert (Kaufpreis, Wohnfläche, Zimmer,
+Baujahr, Energieeffizienzklasse, Hausgeld, Etage) — per
+LLM-Structured-Output (`Settings.llm.structured_predict`, siehe
+`extraktion.py`), nicht per Regex, damit unterschiedliche
+Formulierungen zwischen Dokumenttypen zuverlässig erkannt werden.
+
+Bewusst **pro Dokument**, nicht pro Objekt zusammengeführt: Exposé und
+Energieausweis nennen teils leicht abweichende Werte (siehe
+`docs/testergebnisse.md`) — ein zusammengeführter Datensatz würde
+diesen Widerspruch stillschweigend auflösen. Abrufbar über
+`GET /api/kennzahlen` (alle) bzw. `GET /api/kennzahlen/{objekt_name}`.
+
 ## Projektstruktur
 
 ```
@@ -115,6 +131,7 @@ api.py                  FastAPI-Backend für die Web-UI (nutzt main.py)
 frontend/               Statisches HTML/CSS/JS-Frontend (Chat-Oberfläche)
 db.py                   Gemeinsame Postgres-Verbindungsparameter
 protokoll.py            Anfrage-Protokollierung (Latenz, Tokens, geschätzte Kosten)
+extraktion.py           Strukturierte Kennzahlen-Extraktion (Kaufpreis, Wohnfläche, ...)
 tests/testfragen.py     Regressions-Testkatalog (11 Fragen)
 docs/testergebnisse.md  Dokumentierte Testläufe mit Zeitstempel
 docker-compose.yml      Postgres + pgvector Container (lokale Entwicklung)

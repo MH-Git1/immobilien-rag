@@ -24,6 +24,7 @@ from pydantic import BaseModel
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+import extraktion
 from main import DATA_DIR, baue_index, beantworte_frage, _bekannte_objektnamen
 
 # Wird beim Start einmal befüllt (siehe lifespan unten), damit der Index
@@ -113,6 +114,22 @@ def objekte_auflisten() -> list[str]:
     return sorted(zustand["bekannte_objekte"])
 
 
+@app.get("/api/kennzahlen")
+def kennzahlen_auflisten() -> list[dict]:
+    """
+    Strukturiert extrahierte Kennzahlen (Kaufpreis, Wohnfläche, ...) je
+    Dokument, siehe extraktion.py -- bewusst pro Quelldokument, nicht
+    pro Objekt zusammengeführt, damit Widersprüche zwischen Quellen
+    (z.B. abweichende Wohnflächen-Angabe) sichtbar bleiben.
+    """
+    return extraktion.alle_kennzahlen()
+
+
+@app.get("/api/kennzahlen/{objekt_name}")
+def kennzahlen_fuer_objekt(objekt_name: str) -> list[dict]:
+    return extraktion.kennzahlen_fuer_objekt(objekt_name)
+
+
 def _slug(text: str) -> str:
     """
     Wandelt einen frei eingegebenen Objektnamen in eine dateiname- und
@@ -170,6 +187,9 @@ async def dokumente_hochladen(
             seite.metadata["objekt_name"] = objekt_slug
             seite.metadata["file_name"] = zielpfad.name
             zustand["index"].insert(seite)
+
+        voller_text = "\n".join(seite.text for seite in seiten)
+        extraktion.extrahiere_und_speichere(objekt_slug, zielpfad.name, voller_text)
 
         ergebnisse.append(UploadErgebnis(dateiname=zielpfad.name, seiten=len(seiten)))
 
