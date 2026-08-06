@@ -72,7 +72,8 @@ body {
   background: transparent;
   border: none;
   border-radius: 9px;
-  padding: 7px 14px;
+  padding: 11px 16px;
+  min-height: 44px;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
@@ -231,7 +232,10 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 16px 20px 24px;
+  /* env(safe-area-inset-bottom): zusätzlicher Abstand auf iPhones mit
+     Home-Indicator, damit die Eingabeleiste nicht dahinter verschwindet
+     (braucht viewport-fit=cover im viewport-Meta-Tag, siehe index.html). */
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--bg) 60%, transparent);
 }
 
@@ -255,7 +259,10 @@ body {
   background: transparent;
   color: var(--text);
   font-family: inherit;
-  font-size: 15px;
+  /* 16px statt 15px: iOS Safari zoomt beim Fokussieren automatisch in
+     Eingabefelder mit font-size < 16px hinein — auf Mobilgeräten ein
+     bekanntes, störendes Verhalten. */
+  font-size: 16px;
   padding: 10px 0;
 }
 
@@ -312,7 +319,7 @@ body {
 
 #objekt-eingabe {
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px; /* siehe Kommentar bei #frage-eingabe (iOS-Auto-Zoom) */
   color: var(--text);
   background: var(--oberflaeche);
   border: 1px solid var(--rand);
@@ -397,9 +404,11 @@ body {
   background: transparent;
   color: var(--text-schwach);
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
-  padding: 2px 4px;
+  /* Größeres Touch-Ziel als nur das sichtbare "×"-Zeichen, damit der
+     Button auf dem Handy zuverlässig trifft. */
+  padding: 10px;
 }
 
 #upload-button {
