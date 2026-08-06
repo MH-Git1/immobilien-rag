@@ -13,7 +13,8 @@ Einträge.
 
 ## Lauf vom 2026-08-06 06:38 (CEST) — Reranking objektiv gemessen: hilft hier nicht, bleibt standardmäßig aus
 
-**Git-Commit:** wird nach diesem Commit ergänzt
+**Git-Commit:** `c187ea801ffaabe620fe9a954575ba938ca586c5` ("Retrieval-Qualität:
+LLM-Reranking implementiert und gemessen, standardmäßig deaktiviert")
 
 **Ziel dieses Laufs:** Retrieval-Qualität systematisch verbessern
 (Hybrid-Suche oder Reranking) und mit dem bestehenden LLM-Richter-
