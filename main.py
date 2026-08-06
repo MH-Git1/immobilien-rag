@@ -347,6 +347,25 @@ def baue_index() -> VectorStoreIndex:
     return index
 
 
+def kennzahlen_backfill() -> int:
+    """
+    Holt die Kennzahlen-Extraktion (extraktion.py) nachträglich für
+    alle Dateien in DATA_DIR nach, ohne den Vektor-Index anzufassen.
+    Für den Fall, dass baue_index() beim letzten Aufbau auf eine
+    bereits gefüllte Chunk-Tabelle traf und die automatische Extraktion
+    deshalb übersprungen hat (z.B. weil extraktion.py erst nachträglich
+    hinzugefügt wurde) — sonst müsste man dafür die komplette
+    Vektor-Tabelle leeren und neu embedden. Aufrufbar über
+    api.py: POST /api/admin/kennzahlen-backfill (Basic-Auth-geschützt).
+    Gibt die Anzahl der verarbeiteten Dateien zurück.
+    """
+    dokumente = SimpleDirectoryReader(
+        DATA_DIR, file_metadata=_objekt_metadata
+    ).load_data()
+    _extrahiere_kennzahlen_je_datei(dokumente)
+    return len({doc.metadata.get("file_name", "unbekannt") for doc in dokumente})
+
+
 def _extrahiere_kennzahlen_je_datei(dokumente: list) -> None:
     """
     Strukturierte Kennzahlen (Kaufpreis, Wohnfläche, ...) laufen pro

@@ -25,7 +25,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 import extraktion
-from main import DATA_DIR, baue_index, beantworte_frage, _bekannte_objektnamen
+from main import DATA_DIR, baue_index, beantworte_frage, kennzahlen_backfill, _bekannte_objektnamen
 
 # Wird beim Start einmal befüllt (siehe lifespan unten), damit der Index
 # nicht bei jeder Anfrage neu geladen wird.
@@ -128,6 +128,22 @@ def kennzahlen_auflisten() -> list[dict]:
 @app.get("/api/kennzahlen/{objekt_name}")
 def kennzahlen_fuer_objekt(objekt_name: str) -> list[dict]:
     return extraktion.kennzahlen_fuer_objekt(objekt_name)
+
+
+@app.post("/api/admin/kennzahlen-backfill")
+def kennzahlen_backfill_auslösen() -> dict:
+    """
+    Holt die Kennzahlen-Extraktion nachträglich für alle Dateien in
+    DATA_DIR nach (main.kennzahlen_backfill) -- für den Fall, dass der
+    Vektor-Index schon vor Einführung von extraktion.py gebaut wurde
+    und die automatische Extraktion beim Start deshalb übersprungen
+    wurde. Rührt den Vektor-Index nicht an, kostet daher nur die
+    (deutlich günstigeren) Extraktions-LLM-Calls, kein erneutes
+    Embedding. Wie alle Routen durch die Basic-Auth-Middleware
+    geschützt (siehe BasicAuthMiddleware oben).
+    """
+    anzahl = kennzahlen_backfill()
+    return {"verarbeitete_dateien": anzahl}
 
 
 def _slug(text: str) -> str:
