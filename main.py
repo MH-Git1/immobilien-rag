@@ -7,6 +7,7 @@ dazu interaktiv in der Konsole, jeweils mit Quellenangabe.
 """
 
 import os
+import time
 
 # nltk (Abhängigkeit von LlamaIndex für Satzsegmentierung beim Chunking)
 # bringt seit 2026 einen Schutz gegen Modul-Hijacking aus dem aktuellen
@@ -16,6 +17,7 @@ import os
 # (nltk/inisec.py) — muss vor dem ersten nltk-Import gesetzt sein.
 os.environ.setdefault("NLTK_DISABLE_IMPORT_SECURITY", "1")
 
+import tiktoken
 from dotenv import load_dotenv
 import psycopg2
 
@@ -26,10 +28,14 @@ from llama_index.core import (
     Settings,
     PromptTemplate,
 )
+from llama_index.core.callbacks import CallbackManager, TokenCountingHandler
 from llama_index.core.vector_stores import MetadataFilter, MetadataFilters
 from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.llms.openai import OpenAI
 from llama_index.vector_stores.postgres import PGVectorStore
+
+import protokoll
+from db import verbindungsparameter as _pg_verbindungsparameter
 
 # API-Key aus .env laden (siehe .env-Datei, nicht in Git)
 load_dotenv()
@@ -104,17 +110,6 @@ def _objekt_metadata(datei_pfad: str) -> dict:
     teile = dateiname.split("_")
     objekt_name = teile[1] if len(teile) > 1 else "unbekannt"
     return {"objekt_name": objekt_name}
-
-
-def _pg_verbindungsparameter() -> dict:
-    """Liest die Postgres-Zugangsdaten aus den Umgebungsvariablen (.env)."""
-    return {
-        "host": os.getenv("POSTGRES_HOST", "localhost"),
-        "port": os.getenv("POSTGRES_PORT", "5432"),
-        "database": os.getenv("POSTGRES_DB", "immobilien_rag"),
-        "user": os.getenv("POSTGRES_USER", "immobilien_rag"),
-        "password": os.getenv("POSTGRES_PASSWORD", "immobilien_rag"),
-    }
 
 
 def _baue_pgvector_store() -> PGVectorStore:
@@ -194,11 +189,19 @@ def _erkenne_objekt(frage: str, bekannte_objekte: list[str]) -> str | None:
     return treffer[0] if len(treffer) == 1 else None
 
 
-def beantworte_frage(index: VectorStoreIndex, frage: str, bekannte_objekte: list[str]):
+_TOKEN_ENCODER = tiktoken.encoding_for_model("gpt-4o-mini")
+
+
+def beantworte_frage(
+    index: VectorStoreIndex, frage: str, bekannte_objekte: list[str], herkunft: str
+):
     """
-    Zentrale Anfrage-Funktion, genutzt von interaktive_schleife() und vom
-    Testkatalog (tests/testfragen.py) — stellt sicher, dass beide
-    denselben Filterungs- und Prompt-Mechanismus verwenden.
+    Zentrale Anfrage-Funktion, genutzt von interaktive_schleife(), der
+    Web-API (api.py) und vom Testkatalog (tests/testfragen.py) — stellt
+    sicher, dass alle drei denselben Filterungs- und Prompt-Mechanismus
+    verwenden. herkunft ("konsole"/"web"/"test") kennzeichnet im
+    Anfrage-Protokoll (siehe protokoll.py), woher eine Anfrage kam,
+    damit sich z.B. Testläufe von echter Nutzung unterscheiden lassen.
 
     Wird genau ein Objektname in der Frage erkannt, filtert die
     Vektorsuche gezielt auf dessen Dokumente (objekt_name-Metadatenfeld),
@@ -217,13 +220,55 @@ def beantworte_frage(index: VectorStoreIndex, frage: str, bekannte_objekte: list
             filters=[MetadataFilter(key="objekt_name", value=objekt)]
         )
 
-    query_engine = index.as_query_engine(
-        similarity_top_k=SIMILARITY_TOP_K, filters=filters
+    # Token-Zählung läuft über Settings.callback_manager (global) statt
+    # über die Query-Engine selbst: Settings.llm/Settings.embed_model
+    # sind geteilte Singletons, die Callback-Events nur über den
+    # globalen Callback-Manager feuern — ein callback_manager, der erst
+    # nach dem Bau der Query-Engine gesetzt wird, erreicht sie nicht
+    # (getestet: Token-Zahlen blieben dabei durchgehend 0).
+    # Bekannte Einschränkung: Da Settings.callback_manager global ist,
+    # können sich Zählungen bei echt gleichzeitigen Anfragen theoretisch
+    # überschneiden. Bei der erwarteten Nutzung (einzelne Vertriebspartner,
+    # keine Massenlast) ist das vernachlässigbar und für ein hartes
+    # Locking (das alle Anfragen serialisieren würde) nicht gerechtfertigt.
+    token_zaehler = TokenCountingHandler(tokenizer=_TOKEN_ENCODER.encode)
+    urspruenglicher_callback_manager = Settings.callback_manager
+    Settings.callback_manager = CallbackManager([token_zaehler])
+    try:
+        query_engine = index.as_query_engine(
+            similarity_top_k=SIMILARITY_TOP_K, filters=filters
+        )
+        query_engine.update_prompts(
+            {"response_synthesizer:text_qa_template": QA_PROMPT}
+        )
+        start = time.perf_counter()
+        antwort = query_engine.query(frage)
+        latenz_ms = int((time.perf_counter() - start) * 1000)
+    finally:
+        Settings.callback_manager = urspruenglicher_callback_manager
+
+    quellen = [
+        {"dateiname": node.metadata.get("file_name", "unbekannt"), "score": node.score}
+        for node in antwort.source_nodes
+    ]
+    protokoll.eintrag_schreiben(
+        herkunft=herkunft,
+        frage=frage,
+        antwort=str(antwort),
+        objekt_filter=objekt,
+        quellen=quellen,
+        prompt_tokens=token_zaehler.prompt_llm_token_count,
+        completion_tokens=token_zaehler.completion_llm_token_count,
+        # Bleibt in der Praxis meist 0: PGVectorStore ruft die Query-
+        # Embedding-Erzeugung offenbar auf einem Pfad auf, der keine
+        # Callback-Events feuert (LLM-Tokens werden dagegen zuverlässig
+        # erfasst). Fällt kaum ins Gewicht — Embeddings sind laut
+        # OpenAI-Preisliste ca. 7x günstiger als LLM-Tokens, und pro
+        # Anfrage steht nur die kurze Frage selbst zur Embedding an.
+        embedding_tokens=token_zaehler.total_embedding_token_count,
+        latenz_ms=latenz_ms,
     )
-    query_engine.update_prompts(
-        {"response_synthesizer:text_qa_template": QA_PROMPT}
-    )
-    antwort = query_engine.query(frage)
+
     return antwort, objekt
 
 
@@ -255,6 +300,7 @@ def baue_index() -> VectorStoreIndex:
           Vektoren werden diesmal nicht mehr lokal im Arbeitsspeicher,
           sondern über den PGVectorStore direkt in Postgres geschrieben.
     """
+    protokoll.sicherstelle_tabelle()
     vector_store = _baue_pgvector_store()
 
     anzahl = _anzahl_vorhandener_chunks()
@@ -310,7 +356,7 @@ def interaktive_schleife(index: VectorStoreIndex) -> None:
             print("Auf Wiedersehen.")
             break
 
-        antwort, objekt = beantworte_frage(index, frage, bekannte_objekte)
+        antwort, objekt = beantworte_frage(index, frage, bekannte_objekte, herkunft="konsole")
 
         if objekt:
             print(f"\n[Retrieval gefiltert auf Objekt: {objekt}]")

@@ -96,7 +96,7 @@ class FrageResponse(BaseModel):
 @app.post("/api/frage")
 def frage_stellen(request: FrageRequest) -> FrageResponse:
     antwort, objekt = beantworte_frage(
-        zustand["index"], request.frage, zustand["bekannte_objekte"]
+        zustand["index"], request.frage, zustand["bekannte_objekte"], herkunft="web"
     )
     quellen = [
         Quelle(

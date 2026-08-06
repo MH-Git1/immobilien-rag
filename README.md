@@ -85,6 +85,22 @@ Postgres-Datenbank liegen, nicht auf der Festplatte des Web-Service. Für einen
 produktiven Einsatz mit dauerhafter Dateiablage wäre ein persistentes Volume
 oder Objektspeicher (z. B. S3-kompatibel) der nächste Schritt.
 
+## Beobachtbarkeit (Protokollierung)
+
+Jede Anfrage (Konsole, Web-UI oder Testlauf) wird in der Postgres-Tabelle
+`anfrage_protokoll` erfasst: Frage, Antwort, erkannter Objekt-Filter,
+Quellen, Prompt-/Completion-/Embedding-Tokens, geschätzte Kosten (auf
+Basis der OpenAI-Preise, siehe `protokoll.py`) und Latenz in ms. Das
+`herkunft`-Feld (`web`/`konsole`/`test`) trennt echte Nutzung von
+Testläufen. Beispielabfrage für eine schnelle Kostenübersicht:
+
+```sql
+SELECT herkunft, count(*), round(avg(latenz_ms)) AS avg_latenz_ms,
+       round(sum(geschaetzte_kosten_usd)::numeric, 4) AS summe_kosten_usd
+FROM anfrage_protokoll
+GROUP BY herkunft;
+```
+
 ## Projektstruktur
 
 ```
@@ -95,6 +111,8 @@ scripts/generate_pdfs.py  Generiert die PDFs aus objektdaten.py (reportlab)
 main.py                 Index-Aufbau, Query Engine, interaktive Konsolen-Schleife
 api.py                  FastAPI-Backend für die Web-UI (nutzt main.py)
 frontend/               Statisches HTML/CSS/JS-Frontend (Chat-Oberfläche)
+db.py                   Gemeinsame Postgres-Verbindungsparameter
+protokoll.py            Anfrage-Protokollierung (Latenz, Tokens, geschätzte Kosten)
 tests/testfragen.py     Regressions-Testkatalog (11 Fragen)
 docs/testergebnisse.md  Dokumentierte Testläufe mit Zeitstempel
 docker-compose.yml      Postgres + pgvector Container (lokale Entwicklung)

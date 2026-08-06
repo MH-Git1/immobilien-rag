@@ -236,7 +236,7 @@ def fuehre_tests_aus() -> None:
     ergebnisse = []
     for i, testfall in enumerate(TESTFRAGEN, start=1):
         antwort, objekt_gefiltert = beantworte_frage(
-            index, testfall["frage"], bekannte_objekte
+            index, testfall["frage"], bekannte_objekte, herkunft="test"
         )
         quellen = sorted(
             {node.metadata.get("file_name", "unbekannt") for node in antwort.source_nodes}
